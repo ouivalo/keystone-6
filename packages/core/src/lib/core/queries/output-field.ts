@@ -13,7 +13,7 @@ import {
 import { graphql } from '../../..';
 import { getOperationAccess, getAccessFilters } from '../access-control';
 import { ResolvedDBField, ResolvedRelationDBField } from '../resolve-relationships';
-import { InitialisedList } from '../types-for-lists';
+import { InitialisedListOrSingleton } from '../types-for-lists';
 import { IdType, getDBFieldKeyForFieldOnMultiField, runWithPrisma } from '../utils';
 import { accessReturnError, extensionError } from '../graphql-errors';
 import { accessControlledFilter } from './resolvers';
@@ -22,7 +22,7 @@ import * as queries from './resolvers';
 function getRelationVal(
   dbField: ResolvedRelationDBField,
   id: IdType,
-  foreignList: InitialisedList,
+  foreignList: InitialisedListOrSingleton,
   context: KeystoneContext,
   info: GraphQLResolveInfo,
   fk?: IdType
@@ -99,7 +99,7 @@ function getValueForDBField(
   id: IdType,
   fieldPath: string,
   context: KeystoneContext,
-  lists: Record<string, InitialisedList>,
+  lists: Record<string, InitialisedListOrSingleton>,
   info: GraphQLResolveInfo
 ) {
   if (dbField.kind === 'multi') {
@@ -129,7 +129,7 @@ export function outputTypeField(
   access: IndividualFieldAccessControl<FieldReadItemAccessArgs<BaseListTypeInfo>>,
   listKey: string,
   fieldKey: string,
-  lists: Record<string, InitialisedList>
+  lists: Record<string, InitialisedListOrSingleton>
 ) {
   return graphql.field({
     type: output.type,

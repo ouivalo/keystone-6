@@ -11,6 +11,7 @@ import type {
   BaseKeystoneTypeInfo,
   ListConfig,
 } from '../types';
+import { SingletonConfig } from '../types/config/lists';
 
 export function config<TypeInfo extends BaseKeystoneTypeInfo>(config: KeystoneConfig<TypeInfo>) {
   return config;
@@ -19,8 +20,15 @@ export function config<TypeInfo extends BaseKeystoneTypeInfo>(config: KeystoneCo
 export function list<
   Fields extends BaseFields<ListTypeInfo>,
   ListTypeInfo extends BaseListTypeInfo
->(config: ListConfig<ListTypeInfo, Fields>): ListConfig<ListTypeInfo, any> {
-  return config;
+>(config: Omit<ListConfig<ListTypeInfo, Fields>, 'kind'>): ListConfig<ListTypeInfo, any> {
+  return { ...config, kind: 'list' };
+}
+
+export function singleton<
+  Fields extends BaseFields<ListTypeInfo>,
+  ListTypeInfo extends BaseListTypeInfo
+>(config: Omit<SingletonConfig<ListTypeInfo, Fields>, 'kind'>): SingletonConfig<ListTypeInfo, any> {
+  return { ...config, kind: 'singleton' };
 }
 
 export function gql(strings: TemplateStringsArray) {

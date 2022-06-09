@@ -1,9 +1,9 @@
 import { KeystoneContext } from '../../types';
 import { accessReturnError, extensionError, filterAccessError } from './graphql-errors';
-import { InitialisedList } from './types-for-lists';
+import { InitialisedListOrSingleton } from './types-for-lists';
 
 export async function checkFilterOrderAccess(
-  things: { fieldKey: string; list: InitialisedList }[],
+  things: { fieldKey: string; list: InitialisedListOrSingleton }[],
   context: KeystoneContext,
   operation: 'filter' | 'orderBy'
 ) {

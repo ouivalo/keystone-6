@@ -3,7 +3,7 @@ import pluralize from 'pluralize';
 import { BaseItem, KeystoneConfig, KeystoneContext } from '../../types';
 import { humanize } from '../utils';
 import { prismaError } from './graphql-errors';
-import { InitialisedList } from './types-for-lists';
+import { InitialisedListOrSingleton } from './types-for-lists';
 import { PrismaFilter, UniquePrismaFilter } from './where-inputs';
 
 declare const prisma: unique symbol;
@@ -76,7 +76,7 @@ export type PrismaClient = {
 // Run prisma operations as part of a resolver
 export async function runWithPrisma<T>(
   context: KeystoneContext,
-  { listKey }: InitialisedList,
+  { listKey }: InitialisedListOrSingleton,
   fn: (model: PrismaModel) => Promise<T>
 ) {
   const model = context.prisma[listKey[0].toLowerCase() + listKey.slice(1)];

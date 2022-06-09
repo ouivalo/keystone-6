@@ -1,6 +1,6 @@
 import { KeystoneContext, BaseItem } from '../../../types';
 import { ResolvedDBField } from '../resolve-relationships';
-import { InitialisedList } from '../types-for-lists';
+import { InitialisedList, InitialisedListOrSingleton } from '../types-for-lists';
 import {
   promiseAllRejectWithAllErrors,
   getDBFieldKeyForFieldOnMultiField,
@@ -32,7 +32,7 @@ import { validateUpdateCreate } from './validation';
 
 async function createSingle(
   { data: rawData }: { data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedListOrSingleton,
   context: KeystoneContext,
   operationAccess: boolean
 ) {
@@ -168,7 +168,7 @@ async function updateSingle(
 
 export async function updateOne(
   updateInput: { where: UniqueInputFilter; data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedListOrSingleton,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -197,7 +197,7 @@ export async function updateMany(
 }
 
 async function getResolvedData(
-  list: InitialisedList,
+  list: InitialisedListOrSingleton,
   hookArgs: {
     context: KeystoneContext;
     listKey: string;
@@ -333,7 +333,7 @@ async function getResolvedData(
 }
 
 async function resolveInputForCreateOrUpdate(
-  list: InitialisedList,
+  list: InitialisedListOrSingleton,
   context: KeystoneContext,
   inputData: Record<string, any>,
   item: BaseItem | undefined

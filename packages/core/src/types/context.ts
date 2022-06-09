@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 import { GraphQLSchema, ExecutionResult, DocumentNode } from 'graphql';
-import { InitialisedList } from '../lib/core/types-for-lists';
+import { InitialisedListOrSingleton } from '../lib/core/types-for-lists';
 import { BaseListTypeInfo } from './type-info';
 import { GqlNames, BaseKeystoneTypeInfo } from '.';
 
@@ -24,7 +24,7 @@ export type KeystoneContext<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystone
     /** @deprecated This value is only available if you have config.experimental.contextInitialisedLists = true.
      * This is not a stable API and may contain breaking changes in `patch` level releases.
      */
-    initialisedLists: Record<string, InitialisedList>;
+    initialisedLists: Record<string, InitialisedListOrSingleton>;
   };
 } & Partial<SessionContext<any>>;
 

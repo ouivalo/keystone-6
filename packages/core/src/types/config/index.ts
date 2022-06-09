@@ -16,7 +16,7 @@ import type {
 import { SessionStrategy } from '../session';
 import type { MaybePromise } from '../utils';
 import type {
-  ListSchemaConfig,
+  ListOrSingletonSchemaConfig,
   ListConfig,
   MaybeSessionFunction,
   MaybeItemFunction,
@@ -85,7 +85,7 @@ export type StorageConfig = (
   FileOrImage;
 
 export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo> = {
-  lists: ListSchemaConfig;
+  lists: ListOrSingletonSchemaConfig;
   db: DatabaseConfig<TypeInfo>;
   ui?: AdminUIConfig<TypeInfo>;
   server?: ServerConfig<TypeInfo>;
@@ -117,7 +117,13 @@ export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneT
 
 // config.lists
 
-export type { ListSchemaConfig, ListConfig, BaseFields, MaybeSessionFunction, MaybeItemFunction };
+export type {
+  ListOrSingletonSchemaConfig as ListSchemaConfig,
+  ListConfig,
+  BaseFields,
+  MaybeSessionFunction,
+  MaybeItemFunction,
+};
 
 // config.db
 

@@ -1,6 +1,6 @@
 import { getGqlNames } from '../../../types';
 import { graphql } from '../../..';
-import { InitialisedList } from '../types-for-lists';
+import { InitialisedListOrSingleton } from '../types-for-lists';
 import * as createAndUpdate from './create-update';
 import * as deletes from './delete';
 
@@ -20,7 +20,7 @@ function promisesButSettledWhenAllSettledAndInOrder<T extends Promise<unknown>[]
   }) as T;
 }
 
-export function getMutationsForList(list: InitialisedList) {
+export function getMutationsForList(list: InitialisedListOrSingleton) {
   const names = getGqlNames(list);
 
   const createOne = graphql.field({

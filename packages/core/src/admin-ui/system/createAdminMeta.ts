@@ -1,11 +1,11 @@
 import { GraphQLString, isInputObjectType } from 'graphql';
 import { KeystoneConfig, AdminMetaRootVal, QueryMode } from '../../types';
 import { humanize } from '../../lib/utils';
-import { InitialisedList } from '../../lib/core/types-for-lists';
+import { InitialisedListOrSingleton } from '../../lib/core/types-for-lists';
 
 export function createAdminMeta(
   config: KeystoneConfig,
-  initialisedLists: Record<string, InitialisedList>
+  initialisedLists: Record<string, InitialisedListOrSingleton>
 ) {
   const { ui, lists, session } = config;
   const adminMetaRoot: AdminMetaRootVal = {

@@ -9,7 +9,7 @@ import {
 } from '../../types';
 
 import { PrismaClient } from '../core/utils';
-import { InitialisedList } from '../core/types-for-lists';
+import { InitialisedListOrSingleton } from '../core/types-for-lists';
 import { createImagesContext } from '../assets/createImagesContext';
 import { createFilesContext } from '../assets/createFilesContext';
 import { getDbAPIFactory, itemAPIForList } from './itemAPI';
@@ -27,7 +27,7 @@ export function makeCreateContext({
   config: KeystoneConfig;
   prismaClient: PrismaClient;
   gqlNamesByList: Record<string, GqlNames>;
-  lists: Record<string, InitialisedList>;
+  lists: Record<string, InitialisedListOrSingleton>;
 }) {
   const images = createImagesContext(config);
   const files = createFilesContext(config);
