@@ -88,7 +88,7 @@ input ThingWhereInput {
   toManyRelationshipCard: TodoManyRelationFilter
   text: StringFilter
   timestamp: DateTimeNullableFilter
-  plainDate: DateTimeNullableFilter
+  plainDate: PlainDateNullableFilter
   select: StringNullableFilter
   selectSegmentedControl: StringNullableFilter
   integer: IntNullableFilter
@@ -158,6 +158,17 @@ input DateTimeNullableFilter {
   gt: DateTime
   gte: DateTime
   not: DateTimeNullableFilter
+}
+
+input PlainDateNullableFilter {
+  equals: PlainDate
+  in: [PlainDate!]
+  notIn: [PlainDate!]
+  lt: PlainDate
+  lte: PlainDate
+  gt: PlainDate
+  gte: PlainDate
+  not: PlainDateNullableFilter
 }
 
 input StringNullableFilter {
