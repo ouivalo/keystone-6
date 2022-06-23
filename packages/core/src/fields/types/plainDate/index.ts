@@ -125,7 +125,7 @@ export const plainDate =
           }),
           resolve(val: string | null | undefined) {
             if (val === undefined) {
-              val = defaultValue;
+              val = defaultValue ?? null;
             }
             return resolveInput(val);
           },
