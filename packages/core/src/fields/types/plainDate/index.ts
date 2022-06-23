@@ -1,3 +1,4 @@
+import formatISO from 'date-fns/formatISO';
 import { humanize } from '../../../lib/utils';
 import {
   BaseListTypeInfo,
@@ -15,7 +16,6 @@ import {
 } from '../../non-null-graphql';
 import { resolveView } from '../../resolve-view';
 import { PlainDateFieldMeta } from './views';
-import formatISO from 'date-fns/formatISO';
 
 export type PlainDateFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
