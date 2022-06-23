@@ -68,8 +68,10 @@ export const plainDate =
       if (meta.provider === 'sqlite' || value == null) {
         return value;
       }
-      return new Date(`${value}T00:00Z`);
+      return dateStringToDateObjectInUTC(value);
     };
+
+    const commonResolveFilter = mode === 'optional' ? filters.resolveCommon : <T>(x: T) => x;
 
     return fieldType({
       kind: 'scalar',
@@ -100,10 +102,19 @@ export const plainDate =
       },
       input: {
         uniqueWhere:
-          isIndexed === 'unique' ? { arg: graphql.arg({ type: graphql.PlainDate }) } : undefined,
+          isIndexed === 'unique'
+            ? {
+                arg: graphql.arg({ type: graphql.PlainDate }),
+                resolve: usesNativeDateType ? dateStringToDateObjectInUTC : undefined,
+              }
+            : undefined,
         where: {
-          arg: graphql.arg({ type: filters[meta.provider].DateTime[mode] }),
-          resolve: mode === 'optional' ? filters.resolveCommon : undefined,
+          arg: graphql.arg({
+            type: mode === 'optional' ? PlainDateNullableFilter : PlainDateFilter,
+          }),
+          resolve: usesNativeDateType
+            ? value => commonResolveFilter(transformFilterDateStringsToDateObjects(value))
+            : commonResolveFilter,
         },
         create: {
           arg: graphql.arg({
@@ -145,3 +156,59 @@ export const plainDate =
       },
     });
   };
+
+const dateStringToDateObjectInUTC = (value: string) => new Date(`${value}T00:00Z`);
+
+type PlainDateFilterType = graphql.InputObjectType<{
+  equals: graphql.Arg<typeof graphql.PlainDate>;
+  in: graphql.Arg<graphql.ListType<graphql.NonNullType<typeof graphql.PlainDate>>>;
+  notIn: graphql.Arg<graphql.ListType<graphql.NonNullType<typeof graphql.PlainDate>>>;
+  lt: graphql.Arg<typeof graphql.PlainDate>;
+  lte: graphql.Arg<typeof graphql.PlainDate>;
+  gt: graphql.Arg<typeof graphql.PlainDate>;
+  gte: graphql.Arg<typeof graphql.PlainDate>;
+  not: graphql.Arg<PlainDateFilterType>;
+}>;
+
+function transformFilterDateStringsToDateObjects(
+  filter: graphql.InferValueFromInputType<PlainDateFilterType>
+): Parameters<typeof filters.resolveCommon>[0] {
+  if (filter === null) {
+    return filter;
+  }
+  return Object.fromEntries(
+    Object.entries(filter).map(([key, value]) => {
+      if (value == null) {
+        return [key, value];
+      }
+      if (Array.isArray(value)) {
+        return [key, value.map(dateStringToDateObjectInUTC)];
+      }
+      if (typeof value === 'object') {
+        return [key, transformFilterDateStringsToDateObjects(value)];
+      }
+      return [key, dateStringToDateObjectInUTC(value)];
+    })
+  );
+}
+
+const filterFields = (nestedType: PlainDateFilterType) => ({
+  equals: graphql.arg({ type: graphql.PlainDate }),
+  in: graphql.arg({ type: graphql.list(graphql.nonNull(graphql.PlainDate)) }),
+  notIn: graphql.arg({ type: graphql.list(graphql.nonNull(graphql.PlainDate)) }),
+  lt: graphql.arg({ type: graphql.PlainDate }),
+  lte: graphql.arg({ type: graphql.PlainDate }),
+  gt: graphql.arg({ type: graphql.PlainDate }),
+  gte: graphql.arg({ type: graphql.PlainDate }),
+  not: graphql.arg({ type: nestedType }),
+});
+
+const PlainDateNullableFilter: PlainDateFilterType = graphql.inputObject({
+  name: 'PlainDateNullableFilter',
+  fields: () => filterFields(PlainDateNullableFilter),
+});
+
+const PlainDateFilter: PlainDateFilterType = graphql.inputObject({
+  name: 'PlainDateNullableFilter',
+  fields: () => filterFields(PlainDateFilter),
+});
