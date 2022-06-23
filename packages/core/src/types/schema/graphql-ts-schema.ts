@@ -140,6 +140,41 @@ export const DateTime = graphqlTsSchema.graphql.scalar<Date>(
   })
 );
 
+const RFC_3339_FULL_DATE_REGEX = /^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/;
+
+function validatePlainDate(input: string) {
+  if (!RFC_3339_FULL_DATE_REGEX.test(input)) {
+    throw new GraphQLError('PlainDate scalars must be in the form of a full-date ISO 8601 string');
+  }
+}
+
+export const PlainDate = graphqlTsSchema.graphql.scalar<string>(
+  new GraphQLScalarType({
+    name: 'PlainDate',
+    specifiedByUrl: 'https://datatracker.ietf.org/doc/html/rfc3339#section-5.6',
+    serialize(value: unknown) {
+      if (typeof value !== 'string') {
+        throw new GraphQLError(`unexpected value provided to PlainDate scalar: ${value}`);
+      }
+      return value;
+    },
+    parseLiteral(value) {
+      if (value.kind !== 'StringValue') {
+        throw new GraphQLError('PlainDate only accepts values as strings');
+      }
+      validatePlainDate(value.value);
+      return value.value;
+    },
+    parseValue(value: unknown) {
+      if (typeof value !== 'string') {
+        throw new GraphQLError('PlainDate only accepts values as strings');
+      }
+      validatePlainDate(value);
+      return value;
+    },
+  })
+);
+
 export type NullableType = graphqlTsSchema.NullableType<Context>;
 export type Type = graphqlTsSchema.Type<Context>;
 export type NullableOutputType = graphqlTsSchema.NullableOutputType<Context>;

@@ -23,6 +23,7 @@ type Thing {
   toManyRelationshipCardCount(where: TodoWhereInput! = {}): Int
   text: String
   timestamp: DateTime
+  plainDate: PlainDate
   randomNumberVirtual: Float
   select: String
   selectSegmentedControl: String
@@ -39,6 +40,9 @@ type PasswordState {
 }
 
 scalar DateTime
+  @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
+
+scalar PlainDate
   @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339#section-5.6")
 
 type ImageFieldOutput {
@@ -84,6 +88,7 @@ input ThingWhereInput {
   toManyRelationshipCard: TodoManyRelationFilter
   text: StringFilter
   timestamp: DateTimeNullableFilter
+  plainDate: DateTimeNullableFilter
   select: StringNullableFilter
   selectSegmentedControl: StringNullableFilter
   integer: IntNullableFilter
@@ -210,6 +215,7 @@ input ThingOrderByInput {
   checkbox: OrderDirection
   text: OrderDirection
   timestamp: OrderDirection
+  plainDate: OrderDirection
   select: OrderDirection
   selectSegmentedControl: OrderDirection
   integer: OrderDirection
@@ -230,6 +236,7 @@ input ThingUpdateInput {
   toManyRelationshipCard: TodoRelateToManyForUpdateInput
   text: String
   timestamp: DateTime
+  plainDate: PlainDate
   select: String
   selectSegmentedControl: String
   json: JSON
@@ -280,6 +287,7 @@ input ThingCreateInput {
   toManyRelationshipCard: TodoRelateToManyForCreateInput
   text: String
   timestamp: DateTime
+  plainDate: PlainDate
   select: String
   selectSegmentedControl: String
   json: JSON
