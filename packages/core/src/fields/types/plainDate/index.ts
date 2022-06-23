@@ -130,7 +130,7 @@ export const plainDate =
             return resolveInput(val);
           },
         },
-        update: { arg: graphql.arg({ type: graphql.PlainDate }) },
+        update: { arg: graphql.arg({ type: graphql.PlainDate }), resolve: resolveInput },
         orderBy: { arg: graphql.arg({ type: orderDirectionEnum }) },
       },
       output: graphql.field({
