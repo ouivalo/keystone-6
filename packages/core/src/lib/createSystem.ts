@@ -31,8 +31,6 @@ function getSudoGraphQLSchema(config: KeystoneConfig) {
           listKey,
           {
             ...list,
-            // TODO: I kind of want type checking in here and don't know why it isn't
-            kind: list.kind,
             access: { operation: {}, item: {}, filter: {} },
             graphql: { ...(list.graphql || {}), omit: [] },
             fields: Object.fromEntries(

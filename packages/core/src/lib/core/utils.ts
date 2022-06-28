@@ -121,12 +121,12 @@ export async function promiseAllRejectWithAllErrors<T extends unknown[]>(
 
 export function getNamesFromList(
   listKey: string,
-  { graphql, ui }: KeystoneConfig['lists'][string]
+  { graphql, ui, kind }: KeystoneConfig['lists'][string]
 ) {
   const computedSingular = humanize(listKey);
   const computedPlural = pluralize.plural(computedSingular);
 
-  const path = ui?.path || labelToPath(computedPlural);
+  const path = ui?.path || labelToPath(kind === 'list' ? computedPlural : computedSingular);
 
   if (ui?.path !== undefined && !/^[a-z-_][a-z0-9-_]*$/.test(ui.path)) {
     throw new Error(
@@ -135,14 +135,14 @@ export function getNamesFromList(
   }
 
   const adminUILabels = {
-    label: ui?.label || computedPlural,
+    label: kind === 'list' ? ui?.label || computedPlural : computedSingular,
     singular: ui?.singular || computedSingular,
     plural: ui?.plural || computedPlural,
     path,
   };
 
   const pluralGraphQLName = graphql?.plural || labelToClass(computedPlural);
-  if (pluralGraphQLName === listKey) {
+  if (kind === 'list' && pluralGraphQLName === listKey) {
     throw new Error(
       `The list key and the plural name used in GraphQL must be different but the list key ${listKey} is the same as the plural GraphQL name, please specify graphql.plural`
     );

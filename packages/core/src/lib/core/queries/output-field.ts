@@ -8,6 +8,7 @@ import {
   FindManyArgsValue,
   KeystoneContext,
   GraphQLTypesForList,
+  GraphqlTypesForSingleton,
   FieldReadItemAccessArgs,
 } from '../../../types';
 import { graphql } from '../../..';

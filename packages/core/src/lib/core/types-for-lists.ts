@@ -42,24 +42,46 @@ export type InitialisedField = Omit<NextFieldType, 'dbField' | 'access' | 'graph
   };
 };
 
-export type InitialisedList = {
+type CommonInitialisedList = {
   fields: Record<string, InitialisedField>;
   /** This will include the opposites to one-sided relationships */
   resolvedDbFields: Record<string, ResolvedDBField>;
-  pluralGraphQLName: string;
-  types: GraphQLTypesForList;
   access: ResolvedListAccessControl;
   hooks: ListHooks<BaseListTypeInfo>;
-  adminUILabels: { label: string; singular: string; plural: string; path: string };
+  adminUILabels: { label: string; singular: string; path: string };
   cacheHint: ((args: CacheHintArgs) => CacheHint) | undefined;
-  maxResults: number;
   listKey: string;
-  lists: Record<string, InitialisedList>;
+  lists: Record<string, InitialisedListOrSingleton>;
   dbMap: string | undefined;
+};
+
+export type InitialisedSingleton = {
+  kind: 'singleton';
+  hooks: ListHooks<BaseListTypeInfo>;
+  adminUILabels: { label: string; singular: string; path: string };
+  maxResults: 1;
+  graphql: {
+    isEnabled: {
+      type: boolean;
+      query: boolean;
+      create: false;
+      update: boolean;
+      delete: false;
+    };
+  };
+} & CommonInitialisedList;
+
+export type InitialisedList = {
+  kind: 'list';
+  pluralGraphQLName: string;
+  types: GraphQLTypesForList;
+  maxResults: number;
   graphql: {
     isEnabled: IsEnabled;
   };
-};
+} & CommonInitialisedList;
+
+export type InitialisedListOrSingleton = InitialisedList | InitialisedSingleton;
 
 type IsEnabled = {
   type: boolean;
@@ -75,7 +97,7 @@ function throwIfNotAFilter(x: unknown, listKey: string, fieldKey: string) {
   if (['boolean', 'undefined', 'function'].includes(typeof x)) return;
 
   throw new Error(
-    `Configuration option '${listKey}.${fieldKey}' must be either a boolean value or a function. Received '${x}'.`
+    `Configuration option '${listKey}.${fieldKey}' must be either a boolean value or a function. Received'${x}'.`
   );
 }
 
@@ -84,13 +106,15 @@ function getIsEnabled(listsConfig: KeystoneConfig['lists']) {
 
   for (const [listKey, listConfig] of Object.entries(listsConfig)) {
     const omit = listConfig.graphql?.omit;
-    const { defaultIsFilterable, defaultIsOrderable } = listConfig;
+    const defaultIsFilterable = listConfig.kind === 'list' && listConfig?.defaultIsFilterable;
+    const defaultIsOrderable = listConfig.kind === 'list' && listConfig?.defaultIsOrderable;
+
     if (!omit) {
       // We explicity check for boolean/function values here to ensure the dev hasn't made a mistake
       // when defining these values. We avoid duck-typing here as this is security related
       // and we want to make it hard to write incorrect code.
       throwIfNotAFilter(defaultIsFilterable, listKey, 'defaultIsFilterable');
-      throwIfNotAFilter(defaultIsOrderable, listKey, 'defaultIsOrderable');
+      throwIfNotAFilter(defaultIsFilterable, listKey, 'defaultIsFilterable');
     }
     if (omit === true) {
       isEnabled[listKey] = {
@@ -108,9 +132,9 @@ function getIsEnabled(listsConfig: KeystoneConfig['lists']) {
         query: true,
         create: true,
         update: true,
-        delete: true,
-        filter: defaultIsFilterable ?? true,
-        orderBy: defaultIsOrderable ?? true,
+        delete: listConfig.kind === 'list',
+        filter: defaultIsFilterable ?? listConfig.kind === 'list',
+        orderBy: defaultIsOrderable ?? listConfig.kind === 'list',
       };
     } else {
       isEnabled[listKey] = {
@@ -119,8 +143,8 @@ function getIsEnabled(listsConfig: KeystoneConfig['lists']) {
         create: !omit.includes('create'),
         update: !omit.includes('update'),
         delete: !omit.includes('delete'),
-        filter: defaultIsFilterable ?? true,
-        orderBy: defaultIsOrderable ?? true,
+        filter: defaultIsFilterable ?? listConfig.kind === 'list',
+        orderBy: defaultIsOrderable ?? listConfig.kind === 'list',
       };
     }
   }
@@ -157,7 +181,7 @@ function getListsWithInitialisedFields(
             // when defining these values. We avoid duck-typing here as this is security related
             // and we want to make it hard to write incorrect code.
             throwIfNotAFilter(f.isFilterable, listKey, 'isFilterable');
-            throwIfNotAFilter(f.isOrderable, listKey, 'isOrderable');
+            throwIfNotAFilter(f.isFilterable, listKey, 'isOrderable');
 
             const _isEnabled = {
               read,
@@ -194,7 +218,7 @@ function getListsWithInitialisedFields(
 
 function getListGraphqlTypes(
   listsConfig: KeystoneConfig['lists'],
-  lists: Record<string, InitialisedList>,
+  lists: Record<string, InitialisedListOrSingleton>,
   intermediateLists: Record<string, { graphql: { isEnabled: IsEnabled } }>
 ): Record<string, ListGraphQLTypes> {
   const graphQLTypes: Record<string, ListGraphQLTypes> = {};
@@ -395,32 +419,45 @@ function getListGraphqlTypes(
       });
     }
 
-    graphQLTypes[listKey] = {
-      types: {
-        output,
-        uniqueWhere,
-        where,
-        create,
-        orderBy,
-        update,
-        findManyArgs,
-        relateTo: {
-          many: {
-            where: graphql.inputObject({
-              name: `${listKey}ManyRelationFilter`,
-              fields: {
-                every: graphql.arg({ type: where }),
-                some: graphql.arg({ type: where }),
-                none: graphql.arg({ type: where }),
-              },
-            }),
-            create: relateToManyForCreate,
-            update: relateToManyForUpdate,
+    if (listConfig.kind === 'list') {
+      graphQLTypes[listKey] = {
+        types: {
+          output,
+          uniqueWhere,
+          where,
+          create,
+          orderBy,
+          update,
+          findManyArgs,
+          relateTo: {
+            many: {
+              where: graphql.inputObject({
+                name: `${listKey}ManyRelationFilter`,
+                fields: {
+                  every: graphql.arg({ type: where }),
+                  some: graphql.arg({ type: where }),
+                  none: graphql.arg({ type: where }),
+                },
+              }),
+              create: relateToManyForCreate,
+              update: relateToManyForUpdate,
+            },
+            one: { create: relateToOneForCreate, update: relateToOneForUpdate },
           },
-          one: { create: relateToOneForCreate, update: relateToOneForUpdate },
         },
-      },
-    };
+      };
+    } else {
+      graphQLTypes[listKey] = {
+        types: {
+          output,
+          create,
+          update,
+          relateTo: {
+            one: { create: relateToOneForCreate, update: relateToOneForUpdate },
+          },
+        },
+      };
+    }
   }
 
   return graphQLTypes;
@@ -434,7 +471,9 @@ function getListGraphqlTypes(
  * 5. Handle relationships - ensure correct linking between two sides of all relationships (including one-sided relationships)
  * 6.
  */
-export function initialiseLists(config: KeystoneConfig): Record<string, InitialisedList> {
+export function initialiseLists(
+  config: KeystoneConfig
+): Record<string, InitialisedListOrSingleton> {
   const listsConfig = config.lists;
 
   let intermediateLists;
@@ -452,7 +491,7 @@ export function initialiseLists(config: KeystoneConfig): Record<string, Initiali
    *
    * The object will be populated at the end of this function, and the reference will be maintained
    */
-  const listsRef: Record<string, InitialisedList> = {};
+  const listsRef: Record<string, InitialisedListOrSingleton> = {};
   /** Block statements to contain variables only being used within them */
   {
     const listGraphqlTypes = getListGraphqlTypes(listsConfig, listsRef, intermediateLists);
@@ -514,6 +553,7 @@ export function initialiseLists(config: KeystoneConfig): Record<string, Initiali
       ...intermediateList,
       /** These properties weren't related to any of the above actions but need to be here */
       hooks: intermediateList.hooks || {},
+      kind: listsConfig[listKey].kind,
       cacheHint: (() => {
         const cacheHint = listsConfig[listKey].graphql?.cacheHint;
         if (cacheHint === undefined) {

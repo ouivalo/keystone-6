@@ -1,6 +1,10 @@
 import { KeystoneContext, BaseItem } from '../../../types';
 import { ResolvedDBField } from '../resolve-relationships';
-import { InitialisedList, InitialisedListOrSingleton } from '../types-for-lists';
+import {
+  InitialisedList,
+  InitialisedListOrSingleton,
+  InitialisedSingleton,
+} from '../types-for-lists';
 import {
   promiseAllRejectWithAllErrors,
   getDBFieldKeyForFieldOnMultiField,
@@ -117,6 +121,49 @@ export async function createMany(
   });
 }
 
+async function updateSingleton(
+  updateInput: { data: Record<string, any> },
+  list: InitialisedSingleton,
+  context: KeystoneContext,
+  accessFilters: boolean | InputFilter,
+  operationAccess: boolean
+) {
+  // Operation level access control
+  if (!operationAccess) {
+    throw accessDeniedError(
+      `You cannot perform the 'update' operation on the list '${list.listKey}'.`
+    );
+  }
+
+  const { data: rawData } = updateInput;
+
+  // Filter and Item access control. Will throw an accessDeniedError if not allowed.
+  const item = await getAccessControlledItemForUpdate(
+    list,
+    context,
+    undefined,
+    accessFilters,
+    rawData
+  );
+
+  const { afterOperation, data } = await resolveInputForCreateOrUpdate(
+    list,
+    context,
+    rawData,
+    item
+  );
+
+  const writeLimit = getWriteLimit(context);
+
+  const updatedItem = await writeLimit(() =>
+    runWithPrisma(context, list, model => model.update({ where: { id: item.id }, data }))
+  );
+
+  await afterOperation(updatedItem);
+
+  return updatedItem;
+}
+
 async function updateSingle(
   updateInput: { where: UniqueInputFilter; data: Record<string, any> },
   list: InitialisedList,
@@ -176,6 +223,10 @@ export async function updateOne(
 
   // Get list-level access control filters
   const accessFilters = await getAccessFilters(list, context, 'update');
+
+  if (list.kind === 'singleton') {
+    return updateSingleton(updateInput, list, context, accessFilters, operationAccess);
+  }
 
   return updateSingle(updateInput, list, context, accessFilters, operationAccess);
 }

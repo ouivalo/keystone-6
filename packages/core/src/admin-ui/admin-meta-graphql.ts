@@ -19,6 +19,7 @@ export const staticAdminMetaQuery = gql`
             field
             direction
           }
+          kind
           path
           label
           singular
@@ -83,6 +84,7 @@ export type StaticAdminMetaQuery = {
         initialColumns: Array<string>;
         pageSize: number;
         labelField: string;
+        kind: 'list' | 'singleton';
         initialSort: Maybe<{
           __typename: 'KeystoneAdminUISort';
           field: string;

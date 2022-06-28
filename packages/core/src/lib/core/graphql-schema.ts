@@ -54,7 +54,7 @@ function collectTypes(
     if (!isEnabled.type) continue;
     // adding all of these types explicitly isn't strictly necessary but we do it to create a certain order in the schema
     collectedTypes.push(list.types.output.graphQLType);
-    if (isEnabled.query || isEnabled.update || isEnabled.delete) {
+    if (list.kind === 'list' && (isEnabled.query || isEnabled.update || isEnabled.delete)) {
       collectedTypes.push(list.types.uniqueWhere.graphQLType);
     }
     if (isEnabled.query) {
@@ -70,12 +70,16 @@ function collectTypes(
           );
         }
       }
-      collectedTypes.push(list.types.where.graphQLType);
-      collectedTypes.push(list.types.orderBy.graphQLType);
+      if (list.kind === 'list') {
+        collectedTypes.push(list.types.where.graphQLType);
+        collectedTypes.push(list.types.orderBy.graphQLType);
+      }
     }
     if (isEnabled.update) {
       collectedTypes.push(list.types.update.graphQLType);
-      collectedTypes.push(updateManyByList[list.listKey].graphQLType);
+      if (list.kind === 'list') {
+        collectedTypes.push(updateManyByList[list.listKey].graphQLType);
+      }
     }
     if (isEnabled.create) {
       collectedTypes.push(list.types.create.graphQLType);

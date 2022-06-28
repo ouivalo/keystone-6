@@ -17,7 +17,7 @@ import {
 } from '../../types';
 import { coerceAndValidateForGraphQLInput } from '../coerceAndValidateForGraphQLInput';
 import { accessReturnError, extensionError } from './graphql-errors';
-import { InitialisedListOrSingleton } from './types-for-lists';
+import { InitialisedListOrSingleton, InitialisedList } from './types-for-lists';
 import { InputFilter } from './where-inputs';
 
 export async function getOperationAccess(

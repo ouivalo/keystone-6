@@ -74,8 +74,14 @@ function ItemForm({
   const list = useList(listKey);
 
   const [update, { loading, error, data }] = useMutation(
-    gql`mutation ($data: ${list.gqlNames.updateInputName}!, $id: ID!) {
+    list.kind === 'list'
+      ? gql`mutation ($data: ${list.gqlNames.updateInputName}!, $id: ID!) {
       item: ${list.gqlNames.updateMutationName}(where: { id: $id }, data: $data) {
+        ${selectedFields}
+      }
+    }`
+      : gql`mutation ($data: ${list.gqlNames.updateInputName}!) {
+      item: ${list.gqlNames.updateMutationName}(data: $data) {
         ${selectedFields}
       }
     }`,
@@ -116,7 +122,9 @@ function ItemForm({
     setForceValidation(newForceValidation);
     if (newForceValidation) return;
 
-    update({ variables: { data: dataForUpdate, id: state.item.get('id').data } })
+    update({
+      variables: { data: dataForUpdate, id: list.kind === 'list' && state.item.get('id').data },
+    })
       // TODO -- Experimenting with less detail in the toasts, so the data lines are commented
       // out below. If we're happy with this, clean up the unused lines.
       .then(({ /* data, */ errors }) => {
@@ -271,6 +279,7 @@ export const getItemPage = (props: ItemPageProps) => () => <ItemPage {...props} 
 const ItemPage = ({ listKey }: ItemPageProps) => {
   const list = useList(listKey);
   const id = useRouter().query.id as string;
+
   const { spacing, typography } = useTheme();
 
   const { query, selectedFields } = useMemo(() => {
@@ -289,7 +298,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
       selectedFields,
       query: gql`
         query ItemPage($id: ID!, $listKey: String!) {
-          item: ${list.gqlNames.itemQueryName}(where: {id: $id}) {
+          item: ${list.gqlNames.itemQueryName}${list.kind === 'list' ? `(where: {id: $id})` : ''} {
             ${selectedFields}
           }
           keystone {
@@ -310,6 +319,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
       `,
     };
   }, [list]);
+
   let { data, error, loading } = useQuery(query, {
     variables: { id, listKey },
     errorPolicy: 'all',
@@ -386,7 +396,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
               <ItemForm
                 fieldModes={itemViewFieldModesByField}
                 selectedFields={selectedFields}
-                showDelete={!data.keystone.adminMeta.list!.hideDelete}
+                showDelete={list.kind !== 'singleton' && !data.keystone.adminMeta.list!.hideDelete}
                 listKey={listKey}
                 itemGetter={dataGetter.get('item') as DataGetter<ItemData>}
               />

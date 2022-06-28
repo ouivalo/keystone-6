@@ -102,6 +102,7 @@ export type ListMeta = {
   initialColumns: string[];
   pageSize: number;
   labelField: string;
+  kind: 'list' | 'singleton';
   initialSort: null | { direction: 'ASC' | 'DESC'; field: string };
   fields: { [path: string]: FieldMeta };
 };
@@ -183,6 +184,7 @@ export type ListMetaRootVal = {
   itemQueryName: string;
   listQueryName: string;
   description: string | null;
+  kind: 'list' | 'singleton';
 };
 
 export type AdminMetaRootVal = {

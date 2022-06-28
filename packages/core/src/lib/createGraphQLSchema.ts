@@ -8,6 +8,8 @@ export function createGraphQLSchema(
   lists: Record<string, InitialisedListOrSingleton>,
   adminMeta: AdminMetaRootVal
 ) {
+  // console.log(adminMeta);
+
   // Start with the core keystone graphQL schema
   let graphQLSchema = getGraphQLSchema(lists, {
     mutation: config.session

@@ -129,6 +129,7 @@ export const getListPage = (props: ListPageProps) => () => <ListPage {...props} 
 
 const ListPage = ({ listKey }: ListPageProps) => {
   const list = useList(listKey);
+  console.log(list);
 
   const { query } = useRouter();
 

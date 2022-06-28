@@ -6,7 +6,10 @@ import type { ListHooks } from './hooks';
 import type { ListAccessControl } from './access-control';
 import type { BaseFields, FilterOrderArgs } from './fields';
 
-export type ListSchemaConfig = Record<string, ListConfig<any, BaseFields<BaseListTypeInfo>>>;
+export type ListOrSingletonSchemaConfig = Record<
+  string,
+  ListConfig<any, BaseFields<BaseListTypeInfo>> | SingletonConfig<any, BaseFields<BaseListTypeInfo>>
+>;
 
 export type IdFieldConfig =
   | { kind: 'cuid' | 'uuid' }
@@ -19,10 +22,25 @@ export type IdFieldConfig =
       type?: 'Int' | 'BigInt';
     };
 
+export type SingletonConfig<
+  ListTypeInfo extends BaseListTypeInfo,
+  Fields extends BaseFields<ListTypeInfo>
+> = {
+  kind: 'singleton';
+  fields: Fields;
+  access?: ListAccessControl<ListTypeInfo>;
+  ui?: ListAdminUIConfig<ListTypeInfo, Fields>;
+  hooks?: ListHooks<ListTypeInfo>;
+  graphql?: SingletonGraphQLConfig;
+  db?: ListDBConfig;
+  description?: string;
+};
+
 export type ListConfig<
   ListTypeInfo extends BaseListTypeInfo,
   Fields extends BaseFields<ListTypeInfo>
 > = {
+  kind: 'list';
   /*
       A note on defaults: several options default based on the listKey, including label, path,
       singular, plural, itemQueryName and listQueryName. All these options default independently, so
@@ -199,6 +217,26 @@ export type MaybeItemFunction<T, ListTypeInfo extends BaseListTypeInfo> =
       context: KeystoneContextFromListTypeInfo<ListTypeInfo>;
       item: ListTypeInfo['item'];
     }) => MaybePromise<T>);
+
+export type SingletonGraphQLConfig = {
+  /**
+   * The description added to the GraphQL schema
+   * @default listConfig.description
+   */
+  description?: string;
+  cacheHint?: ((args: CacheHintArgs) => CacheHint) | CacheHint;
+  // Setting any of these values will remove the corresponding operations from the GraphQL schema.
+  // Queries:
+  //   'query':  Does item()/items() exist?
+  // Mutations:
+  //   'create': Does createItem/createItems exist? Does `create` exist on the RelationshipInput types?
+  //   'update': Does updateItem/updateItems exist?
+  // If `true`, then everything will be omitted, including the output type. This makes it a DB only list,
+  // including from the point of view of relationships to this list.
+  //
+  // Default: undefined
+  omit?: true | readonly ('query' | 'create' | 'update')[];
+};
 
 export type ListGraphQLConfig = {
   /**

@@ -393,6 +393,25 @@ export type FieldTypeWithoutDBField<
 
 type AnyInputObj = graphql.InputObjectType<Record<string, graphql.Arg<graphql.InputType, any>>>;
 
+export type GraphqlTypesForSingleton = {
+  update: AnyInputObj;
+  create: AnyInputObj;
+  output: graphql.ObjectType<BaseItem>;
+  relateTo: {
+    one: {
+      create?: graphql.InputObjectType<{
+        create?: graphql.Arg<GraphqlTypesForSingleton['create']>;
+        connect: graphql.Arg<typeof graphql.Boolean>;
+      }>;
+      update?: graphql.InputObjectType<{
+        create?: graphql.Arg<GraphqlTypesForSingleton['create']>;
+        connect: graphql.Arg<typeof graphql.Boolean>;
+        disconnect: graphql.Arg<typeof graphql.Boolean>;
+      }>;
+    };
+  };
+};
+
 export type GraphQLTypesForList = {
   update: AnyInputObj;
   create: AnyInputObj;

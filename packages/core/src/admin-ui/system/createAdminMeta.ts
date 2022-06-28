@@ -61,7 +61,6 @@ export function createAdminMeta(
       description: listConfig.ui?.description ?? listConfig.description ?? null,
       label: list.adminUILabels.label,
       singular: list.adminUILabels.singular,
-      plural: list.adminUILabels.plural,
       path: list.adminUILabels.path,
       fields: [],
       pageSize: listConfig.ui?.listView?.pageSize ?? 50,
@@ -72,7 +71,10 @@ export function createAdminMeta(
           | undefined) ?? null,
       // TODO: probably remove this from the GraphQL schema and here
       itemQueryName: key,
-      listQueryName: list.pluralGraphQLName,
+      ...(list.kind === 'list'
+        ? { listQueryName: list.pluralGraphQLName, plural: list.adminUILabels.plural }
+        : { listQueryName: '', plural: '' }),
+      kind: list.kind,
     };
     adminMetaRoot.lists.push(adminMetaRoot.listsByKey[key]);
   }
@@ -96,23 +98,29 @@ export function createAdminMeta(
         `The ui.searchFields option on the ${key} list includes 'id'. Lists can always be searched by an item's id so it must not be specified as a search field`
       );
     }
-    const whereInputFields = list.types.where.graphQLType.getFields();
+
     const possibleSearchFields = new Map<string, 'default' | 'insensitive' | null>();
 
-    for (const fieldKey of Object.keys(list.fields)) {
-      const filterType = whereInputFields[fieldKey]?.type;
-      const fieldFilterFields = isInputObjectType(filterType) ? filterType.getFields() : undefined;
-      if (fieldFilterFields?.contains?.type === GraphQLString) {
-        possibleSearchFields.set(
-          fieldKey,
-          fieldFilterFields?.mode?.type === QueryMode.graphQLType ? 'insensitive' : 'default'
-        );
+    if (list.kind === 'list') {
+      const whereInputFields = list.types.where.graphQLType.getFields();
+
+      for (const fieldKey of Object.keys(list.fields)) {
+        const filterType = whereInputFields[fieldKey]?.type;
+        const fieldFilterFields = isInputObjectType(filterType)
+          ? filterType.getFields()
+          : undefined;
+        if (fieldFilterFields?.contains?.type === GraphQLString) {
+          possibleSearchFields.set(
+            fieldKey,
+            fieldFilterFields?.mode?.type === QueryMode.graphQLType ? 'insensitive' : 'default'
+          );
+        }
       }
-    }
-    if (config.lists[key].ui?.searchFields === undefined) {
-      const labelField = adminMetaRoot.listsByKey[key].labelField;
-      if (possibleSearchFields.has(labelField)) {
-        searchFields.add(labelField);
+      if (config.lists[key].ui?.searchFields === undefined) {
+        const labelField = adminMetaRoot.listsByKey[key].labelField;
+        if (possibleSearchFields.has(labelField)) {
+          searchFields.add(labelField);
+        }
       }
     }
 

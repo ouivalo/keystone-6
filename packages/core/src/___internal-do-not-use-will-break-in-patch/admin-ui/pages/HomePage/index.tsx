@@ -16,6 +16,7 @@ import { Link, LinkProps } from '../../../../admin-ui/router';
 type ListCardProps = {
   listKey: string;
   hideCreate: boolean;
+  kind: 'list' | 'singleton';
   count:
     | { type: 'success'; count: number }
     | { type: 'no-access' }
@@ -23,13 +24,13 @@ type ListCardProps = {
     | { type: 'loading' };
 };
 
-const ListCard = ({ listKey, count, hideCreate }: ListCardProps) => {
+const ListCard = ({ listKey, count, hideCreate, kind }: ListCardProps) => {
   const { colors, palette, radii, spacing } = useTheme();
   const list = useList(listKey);
   return (
     <div css={{ position: 'relative' }}>
       <Link
-        href={`/${list.path}`}
+        href={`/${list.path}${list.kind === 'singleton' && '/singleton'}`}
         css={{
           backgroundColor: colors.background,
           borderColor: colors.border,
@@ -50,19 +51,23 @@ const ListCard = ({ listKey, count, hideCreate }: ListCardProps) => {
         }}
       >
         <h3 css={{ margin: `0 0 ${spacing.small}px 0` }}>{list.label} </h3>
-        {count.type === 'success' ? (
-          <span css={{ color: colors.foreground, textDecoration: 'none' }}>
-            {count.count} item{count.count !== 1 ? 's' : ''}
-          </span>
-        ) : count.type === 'error' ? (
-          count.message
-        ) : count.type === 'loading' ? (
-          <LoadingDots label={`Loading count of ${list.plural}`} size="small" tone="passive" />
+        {kind === 'list' ? (
+          count.type === 'success' ? (
+            <span css={{ color: colors.foreground, textDecoration: 'none' }}>
+              {count.count} item{count.count !== 1 ? 's' : ''}
+            </span>
+          ) : count.type === 'error' ? (
+            count.message
+          ) : count.type === 'loading' ? (
+            <LoadingDots label={`Loading count of ${list.plural}`} size="small" tone="passive" />
+          ) : (
+            'No access'
+          )
         ) : (
-          'No access'
+          false
         )}
       </Link>
-      {hideCreate === false && (
+      {hideCreate === false && kind === 'list' && (
         <CreateButton title={`Create ${list.singular}`} href={`/${list.path}/create`}>
           <PlusIcon size="large" />
           <VisuallyHidden>Create {list.singular}</VisuallyHidden>
@@ -119,6 +124,7 @@ export const HomePage = () => {
         }
       }
       ${Object.entries(lists)
+        .filter(([, list]) => list.kind === 'list')
         .map(([listKey, list]) => `${listKey}: ${list.gqlNames.listQueryCountName}`)
         .join('\n')}
     }`,
@@ -161,6 +167,7 @@ export const HomePage = () => {
               const result = dataGetter.get(key);
               return (
                 <ListCard
+                  kind={lists[key].kind}
                   count={
                     data
                       ? result.errors

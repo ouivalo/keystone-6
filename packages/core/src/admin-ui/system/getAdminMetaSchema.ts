@@ -261,6 +261,7 @@ export function getAdminMetaSchema({
       listQueryName: graphql.field({
         type: graphql.nonNull(graphql.String),
       }),
+      plural: graphql.field({ type: graphql.nonNull(graphql.String) }),
       hideCreate: graphql.field({
         type: graphql.nonNull(graphql.Boolean),
         resolve(rootVal, args, context) {
@@ -294,7 +295,14 @@ export function getAdminMetaSchema({
       path: graphql.field({ type: graphql.nonNull(graphql.String) }),
       label: graphql.field({ type: graphql.nonNull(graphql.String) }),
       singular: graphql.field({ type: graphql.nonNull(graphql.String) }),
-      plural: graphql.field({ type: graphql.nonNull(graphql.String) }),
+      kind: graphql.field({
+        type: graphql.nonNull(
+          graphql.enum({
+            name: 'kind',
+            values: graphql.enumValues(['list', 'singleton']),
+          })
+        ),
+      }),
       description: graphql.field({ type: graphql.String }),
       initialColumns: graphql.field({
         type: graphql.nonNull(graphql.list(graphql.nonNull(graphql.String))),

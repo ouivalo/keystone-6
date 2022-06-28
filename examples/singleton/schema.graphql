@@ -265,21 +265,6 @@ type Publisher {
   RelatedBrands: Link
 }
 
-input PublisherWhereUniqueInput {
-  id: ID
-}
-
-input PublisherWhereInput {
-  AND: [PublisherWhereInput!]
-  OR: [PublisherWhereInput!]
-  NOT: [PublisherWhereInput!]
-  id: IDFilter
-}
-
-input PublisherOrderByInput {
-  id: OrderDirection
-}
-
 input PublisherUpdateInput {
   title: String
   copyrightText: String
@@ -291,11 +276,6 @@ input LinkRelateToOneForUpdateInput {
   create: LinkCreateInput
   connect: LinkWhereUniqueInput
   disconnect: Boolean
-}
-
-input PublisherUpdateArgs {
-  where: PublisherWhereUniqueInput!
-  data: PublisherUpdateInput!
 }
 
 input PublisherCreateInput {
@@ -338,12 +318,7 @@ type Mutation {
   deleteLink(where: LinkWhereUniqueInput!): Link
   deleteLinks(where: [LinkWhereUniqueInput!]!): [Link]
   createPublisher(data: PublisherCreateInput!): Publisher
-  createPublishers(data: [PublisherCreateInput!]!): [Publisher]
-  updatePublisher(
-    where: PublisherWhereUniqueInput!
-    data: PublisherUpdateInput!
-  ): Publisher
-  updatePublishers(data: [PublisherUpdateArgs!]!): [Publisher]
+  updatePublisher(data: PublisherUpdateInput!): Publisher
 }
 
 type Query {
@@ -371,14 +346,7 @@ type Query {
   ): [Link!]
   link(where: LinkWhereUniqueInput!): Link
   linksCount(where: LinkWhereInput! = {}): Int
-  publishers(
-    where: PublisherWhereInput! = {}
-    orderBy: [PublisherOrderByInput!]! = []
-    take: Int
-    skip: Int! = 0
-  ): [Publisher!]
-  publisher(where: PublisherWhereUniqueInput!): Publisher
-  publishersCount(where: PublisherWhereInput! = {}): Int
+  publisher: Publisher
   keystone: KeystoneMeta!
 }
 
@@ -397,12 +365,13 @@ type KeystoneAdminUIListMeta {
   key: String!
   itemQueryName: String!
   listQueryName: String!
+  plural: String!
   hideCreate: Boolean!
   hideDelete: Boolean!
   path: String!
   label: String!
   singular: String!
-  plural: String!
+  kind: kind!
   description: String
   initialColumns: [String!]!
   pageSize: Int!
@@ -410,6 +379,11 @@ type KeystoneAdminUIListMeta {
   fields: [KeystoneAdminUIFieldMeta!]!
   initialSort: KeystoneAdminUISort
   isHidden: Boolean!
+}
+
+enum kind {
+  list
+  singleton
 }
 
 type KeystoneAdminUIFieldMeta {
