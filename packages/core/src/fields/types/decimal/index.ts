@@ -2,7 +2,7 @@ import { humanize } from '../../../lib/utils';
 import {
   fieldType,
   FieldTypeFunc,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   CommonFieldConfig,
   orderDirectionEnum,
   Decimal,
@@ -17,7 +17,7 @@ import {
   getResolvedIsNullable,
 } from '../../non-null-graphql';
 
-export type DecimalFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type DecimalFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     validation?: {
       min?: string;
@@ -50,7 +50,7 @@ function parseDecimalValueOption(meta: FieldData, value: string, name: string) {
 }
 
 export const decimal =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     isIndexed,
     precision = 18,
     scale = 4,

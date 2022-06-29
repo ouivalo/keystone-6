@@ -1,7 +1,7 @@
 import { KeystoneContext } from '../../../types';
 import { accessDeniedError, accessReturnError, extensionError } from '../graphql-errors';
 import { mapUniqueWhereToWhere } from '../queries/resolvers';
-import { InitialisedList, InitialisedListOrSingleton } from '../types-for-lists';
+import { InitialisedStandardList, InitialisedList } from '../types-for-lists';
 import { runWithPrisma } from '../utils';
 import {
   InputFilter,
@@ -19,7 +19,7 @@ const missingItem = (operation: string, uniqueWhere: UniquePrismaFilter) =>
   );
 
 async function getFilteredItem(
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   context: KeystoneContext,
   uniqueWhere: UniquePrismaFilter,
   accessFilters: boolean | InputFilter,
@@ -46,7 +46,7 @@ async function getFilteredItem(
 
 export async function checkUniqueItemExists(
   uniqueInput: UniqueInputFilter,
-  foreignList: InitialisedList,
+  foreignList: InitialisedStandardList,
   context: KeystoneContext,
   operation: string
 ) {
@@ -65,7 +65,7 @@ export async function checkUniqueItemExists(
 }
 
 export async function getAccessControlledItemForDelete(
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   uniqueWhere: UniquePrismaFilter,
   accessFilters: boolean | InputFilter
@@ -116,7 +116,7 @@ export async function getAccessControlledItemForDelete(
 
 export async function getAccessControlledItemForUpdate(
   // TODO should this include singletons?
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   context: KeystoneContext,
   uniqueWhere: UniquePrismaFilter,
   accessFilters: boolean | InputFilter,
@@ -214,7 +214,7 @@ export async function getAccessControlledItemForUpdate(
 }
 
 export async function applyAccessControlForCreate(
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   inputData: Record<string, unknown>
 ) {

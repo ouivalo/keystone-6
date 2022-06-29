@@ -1,6 +1,6 @@
 import { FileUpload } from 'graphql-upload';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   fieldType,
   FieldTypeFunc,
   CommonFieldConfig,
@@ -12,7 +12,7 @@ import { graphql } from '../../..';
 import { resolveView } from '../../resolve-view';
 import { SUPPORTED_IMAGE_EXTENSIONS } from './utils';
 
-export type ImageFieldConfig<ListTypeInfo extends BaseListTypeInfo> = {
+export type ImageFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> = {
   storage: string;
 } & CommonFieldConfig<ListTypeInfo>;
 
@@ -62,7 +62,7 @@ function isValidImageExtension(extension: string): extension is ImageExtension {
 }
 
 export const image =
-  <ListTypeInfo extends BaseListTypeInfo>(
+  <ListTypeInfo extends BaseStandardListTypeInfo>(
     config: ImageFieldConfig<ListTypeInfo>
   ): FieldTypeFunc<ListTypeInfo> =>
   meta => {

@@ -1,6 +1,6 @@
 import { humanize } from '../../../lib/utils';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   CommonFieldConfig,
   fieldType,
   orderDirectionEnum,
@@ -11,7 +11,7 @@ import { graphql } from '../../..';
 import { assertCreateIsNonNullAllowed, assertReadIsNonNullAllowed } from '../../non-null-graphql';
 import { resolveView } from '../../resolve-view';
 
-export type TextFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type TextFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     isIndexed?: true | 'unique';
     ui?: {
@@ -55,7 +55,7 @@ export type TextFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
   };
 
 export const text =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     isIndexed,
     defaultValue: _defaultValue,
     validation: _validation,

@@ -1,6 +1,6 @@
 import { GraphQLSchema } from 'graphql';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   KeystoneDbAPI,
   KeystoneListsAPI,
   KeystoneContext,
@@ -18,7 +18,7 @@ const objectEntriesButUsingKeyof: <T extends Record<string, any>>(
 export function getDbAPIFactory(
   gqlNames: GqlNames,
   schema: GraphQLSchema
-): (context: KeystoneContext) => KeystoneDbAPI<Record<string, BaseListTypeInfo>>[string] {
+): (context: KeystoneContext) => KeystoneDbAPI<Record<string, BaseStandardListTypeInfo>>[string] {
   const f = (operation: 'query' | 'mutation', fieldName: string) => {
     const rootType = operation === 'mutation' ? schema.getMutationType()! : schema.getQueryType()!;
     const field = rootType.getFields()[fieldName];
@@ -55,7 +55,7 @@ export function getDbAPIFactory(
 export function itemAPIForList(
   listKey: string,
   context: KeystoneContext
-): KeystoneListsAPI<Record<string, BaseListTypeInfo>>[string] {
+): KeystoneListsAPI<Record<string, BaseStandardListTypeInfo>>[string] {
   const f = (operation: 'query' | 'mutation', field: string) => {
     const exec = executeGraphQLFieldWithSelection(context.graphql.schema, operation, field);
     return ({ query, ...args }: { query?: string } & Record<string, any> = {}) => {

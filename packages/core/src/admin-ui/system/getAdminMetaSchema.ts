@@ -9,7 +9,7 @@ import {
 } from '../../types';
 import { graphql as graphqlBoundToKeystoneContext } from '../..';
 
-import { InitialisedListOrSingleton } from '../../lib/core/types-for-lists';
+import { InitialisedList } from '../../lib/core/types-for-lists';
 
 const graphql = {
   ...graphqlBoundToKeystoneContext,
@@ -25,7 +25,7 @@ export function getAdminMetaSchema({
 }: {
   adminMeta: AdminMetaRootVal;
   config: KeystoneConfig;
-  lists: Record<string, InitialisedListOrSingleton>;
+  lists: Record<string, InitialisedList>;
 }) {
   const isAccessAllowed =
     config.ui?.isAccessAllowed ??

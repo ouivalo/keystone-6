@@ -3,7 +3,7 @@ import { mergeSchemas } from '@graphql-tools/schema';
 
 import type {
   BaseFields,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   ExtendGraphqlSchema,
   GraphQLSchemaExtension,
   KeystoneConfig,
@@ -19,14 +19,14 @@ export function config<TypeInfo extends BaseKeystoneTypeInfo>(config: KeystoneCo
 
 export function list<
   Fields extends BaseFields<ListTypeInfo>,
-  ListTypeInfo extends BaseListTypeInfo
+  ListTypeInfo extends BaseStandardListTypeInfo
 >(config: Omit<ListConfig<ListTypeInfo, Fields>, 'kind'>): ListConfig<ListTypeInfo, any> {
   return { ...config, kind: 'list' };
 }
 
 export function singleton<
   Fields extends BaseFields<ListTypeInfo>,
-  ListTypeInfo extends BaseListTypeInfo
+  ListTypeInfo extends BaseStandardListTypeInfo
 >(config: Omit<SingletonConfig<ListTypeInfo, Fields>, 'kind'>): SingletonConfig<ListTypeInfo, any> {
   return { ...config, kind: 'singleton' };
 }

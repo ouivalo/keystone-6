@@ -1,6 +1,6 @@
 import { userInputError } from '../../../lib/core/graphql-errors';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   CommonFieldConfig,
   fieldType,
   FieldTypeFunc,
@@ -11,7 +11,7 @@ import { graphql } from '../../..';
 import { assertCreateIsNonNullAllowed, assertReadIsNonNullAllowed } from '../../non-null-graphql';
 import { resolveView } from '../../resolve-view';
 
-export type CheckboxFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type CheckboxFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     defaultValue?: boolean;
     graphql?: {
@@ -22,7 +22,7 @@ export type CheckboxFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
   };
 
 export const checkbox =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     defaultValue = false,
     ...config
   }: CheckboxFieldConfig<ListTypeInfo> = {}): FieldTypeFunc<ListTypeInfo> =>

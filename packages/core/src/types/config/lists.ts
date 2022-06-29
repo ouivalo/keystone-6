@@ -1,14 +1,15 @@
 import type { CacheHint } from 'apollo-server-types';
 import type { MaybePromise } from '../utils';
-import { BaseListTypeInfo } from '../type-info';
+import { BaseStandardListTypeInfo, BaseSingletonTypeInfo, BaseListTypeInfo } from '../type-info';
 import { KeystoneContextFromListTypeInfo } from '..';
 import type { ListHooks } from './hooks';
-import type { ListAccessControl } from './access-control';
+import type { StandardListAccessControl, SingletonListAccessControl } from './access-control';
 import type { BaseFields, FilterOrderArgs } from './fields';
 
 export type ListOrSingletonSchemaConfig = Record<
   string,
-  ListConfig<any, BaseFields<BaseListTypeInfo>> | SingletonConfig<any, BaseFields<BaseListTypeInfo>>
+  | StandardListConfig<any, BaseFields<BaseStandardListTypeInfo>>
+  | SingletonConfig<any, BaseFields<BaseSingletonTypeInfo>>
 >;
 
 export type IdFieldConfig =
@@ -23,21 +24,21 @@ export type IdFieldConfig =
     };
 
 export type SingletonConfig<
-  ListTypeInfo extends BaseListTypeInfo,
+  ListTypeInfo extends BaseSingletonTypeInfo,
   Fields extends BaseFields<ListTypeInfo>
 > = {
   kind: 'singleton';
   fields: Fields;
-  access?: ListAccessControl<ListTypeInfo>;
-  ui?: ListAdminUIConfig<ListTypeInfo, Fields>;
+  access?: SingletonListAccessControl<ListTypeInfo>;
+  ui?: SingletonListAdminUIConfig<ListTypeInfo>;
   hooks?: ListHooks<ListTypeInfo>;
   graphql?: SingletonGraphQLConfig;
   db?: ListDBConfig;
   description?: string;
 };
 
-export type ListConfig<
-  ListTypeInfo extends BaseListTypeInfo,
+export type StandardListConfig<
+  ListTypeInfo extends BaseStandardListTypeInfo,
   Fields extends BaseFields<ListTypeInfo>
 > = {
   kind: 'list';
@@ -54,10 +55,10 @@ export type ListConfig<
    * @default true
    * @see https://www.keystonejs.com/guides/auth-and-access-control
    */
-  access?: ListAccessControl<ListTypeInfo>;
+  access?: StandardListAccessControl<ListTypeInfo>;
 
   /** Config for how this list should act in the Admin UI */
-  ui?: ListAdminUIConfig<ListTypeInfo, Fields>;
+  ui?: StandardListAdminUIConfig<ListTypeInfo, Fields>;
 
   /**
    * Hooks to modify the behaviour of GraphQL operations at certain points
@@ -79,10 +80,10 @@ export type ListConfig<
   defaultIsOrderable?: false | ((args: FilterOrderArgs<ListTypeInfo>) => MaybePromise<boolean>); // The default value to use for graphql.isEnabled.orderBy on all fields for this list
 };
 
-export type ListAdminUIConfig<
-  ListTypeInfo extends BaseListTypeInfo,
+export type StandardListAdminUIConfig<
+  ListTypeInfo extends BaseStandardListTypeInfo,
   Fields extends BaseFields<ListTypeInfo>
-> = {
+> = CommonListAdminUI<ListTypeInfo> & {
   /**
    * The field to use as a label in the Admin UI. If you want to base the label off more than a single field, use a virtual field and reference that field here.
    * @default 'label', if it exists, falling back to 'name', then 'title', and finally 'id', which is guaranteed to exist.
@@ -95,20 +96,6 @@ export type ListAdminUIConfig<
    */
   searchFields?: readonly Extract<keyof Fields, string>[];
 
-  /** The path that the list should be at in the Admin UI */
-  // Not currently used. Should be passed into `keystone.createList()`.
-  // path?: string;
-  /**
-   * The description shown on the list page
-   * @default listConfig.description
-   */
-  description?: string; // the description displayed below the field in the Admin UI
-
-  /**
-   * Excludes this list from the Admin UI
-   * @default false
-   */
-  isHidden?: MaybeSessionFunction<boolean, ListTypeInfo>;
   /**
    * Hides the create button in the Admin UI.
    * Note that this does **not** disable creating items through the GraphQL API, it only hides the button to create an item for this list in the Admin UI.
@@ -131,19 +118,6 @@ export type ListAdminUIConfig<
      * @default 'edit'
      */
     defaultFieldMode?: MaybeSessionFunction<'edit' | 'hidden', ListTypeInfo>;
-  };
-
-  /**
-   * Configuration specific to the item view in the Admin UI
-   */
-  itemView?: {
-    /**
-     * The default field mode for fields on the item view for this list.
-     * This controls what people can do for fields
-     * Specific field modes on a per-field basis via a field's config.
-     * @default 'edit'
-     */
-    defaultFieldMode?: MaybeItemFunction<'edit' | 'read' | 'hidden', ListTypeInfo>;
   };
 
   /**
@@ -170,6 +144,43 @@ export type ListAdminUIConfig<
   };
 
   /**
+   * The plural form of the list key.
+   *
+   * It is used in sentences like `Are you sure you want to delete this {singular}?`.
+   * @default pluralize.plural(label)
+   */
+  plural?: string;
+};
+
+type CommonListAdminUI<ListTypeInfo extends BaseListTypeInfo> = {
+  /** The path that the list should be at in the Admin UI */
+  // Not currently used. Should be passed into `keystone.createList()`.
+  // path?: string;
+  /**
+   * The description shown on the list page
+   * @default listConfig.description
+   */
+  description?: string; // the description displayed below the field in the Admin UI
+
+  /**
+   * Excludes this list from the Admin UI
+   * @default false
+   */
+  isHidden?: MaybeSessionFunction<boolean, ListTypeInfo>;
+  /**
+   * Configuration specific to the item view in the Admin UI
+   */
+  itemView?: {
+    /**
+     * The default field mode for fields on the item view for this list.
+     * This controls what people can do for fields
+     * Specific field modes on a per-field basis via a field's config.
+     * @default 'edit'
+     */
+    defaultFieldMode?: MaybeItemFunction<'edit' | 'read' | 'hidden', ListTypeInfo>;
+  };
+
+  /**
    * The label used to identify the list in navigation and etc.
    * @default listKey.replace(/([a-z])([A-Z])/g, '$1 $2').split(/\s|_|\-/).filter(i => i).map(upcase).join(' ');
    */
@@ -184,14 +195,6 @@ export type ListAdminUIConfig<
   singular?: string;
 
   /**
-   * The plural form of the list key.
-   *
-   * It is used in sentences like `Are you sure you want to delete this {singular}?`.
-   * @default pluralize.plural(label)
-   */
-  plural?: string;
-
-  /**
    * The path segment to identify the list in URLs.
    *
    * It must match the pattern `/^[a-z-_][a-z0-9-_]*$/`.
@@ -199,6 +202,9 @@ export type ListAdminUIConfig<
    */
   path?: string;
 };
+
+export type SingletonListAdminUIConfig<ListTypeInfo extends BaseSingletonTypeInfo> =
+  CommonListAdminUI<ListTypeInfo>;
 
 export type MaybeSessionFunction<
   T extends string | boolean,

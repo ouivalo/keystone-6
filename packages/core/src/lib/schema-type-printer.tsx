@@ -10,7 +10,7 @@ import {
   introspectionTypes,
 } from 'graphql';
 import { getGqlNames } from '../types';
-import { InitialisedList } from './core/types-for-lists';
+import { InitialisedStandardList } from './core/types-for-lists';
 
 const introspectionTypesSet = new Set(introspectionTypes);
 
@@ -77,7 +77,7 @@ function printInputTypesFromSchema(schema: GraphQLSchema, scalars: Record<string
 
 export function printGeneratedTypes(
   graphQLSchema: GraphQLSchema,
-  lists: Record<string, InitialisedList>
+  lists: Record<string, InitialisedStandardList>
 ) {
   let scalars = {
     ID: 'string',

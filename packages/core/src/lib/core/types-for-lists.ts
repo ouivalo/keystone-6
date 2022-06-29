@@ -4,7 +4,7 @@ import {
   GraphQLTypesForList,
   getGqlNames,
   NextFieldType,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   ListGraphQLTypes,
   ListHooks,
   KeystoneConfig,
@@ -29,14 +29,18 @@ import { assertFieldsValid } from './field-assertions';
 export type InitialisedField = Omit<NextFieldType, 'dbField' | 'access' | 'graphql'> & {
   dbField: ResolvedDBField;
   access: ResolvedFieldAccessControl;
-  hooks: FieldHooks<BaseListTypeInfo>;
+  hooks: FieldHooks<BaseStandardListTypeInfo>;
   graphql: {
     isEnabled: {
       read: boolean;
       create: boolean;
       update: boolean;
-      filter: boolean | ((args: FilterOrderArgs<BaseListTypeInfo>) => MaybePromise<boolean>);
-      orderBy: boolean | ((args: FilterOrderArgs<BaseListTypeInfo>) => MaybePromise<boolean>);
+      filter:
+        | boolean
+        | ((args: FilterOrderArgs<BaseStandardListTypeInfo>) => MaybePromise<boolean>);
+      orderBy:
+        | boolean
+        | ((args: FilterOrderArgs<BaseStandardListTypeInfo>) => MaybePromise<boolean>);
     };
     cacheHint: CacheHint | undefined;
   };
@@ -47,41 +51,25 @@ type CommonInitialisedList = {
   /** This will include the opposites to one-sided relationships */
   resolvedDbFields: Record<string, ResolvedDBField>;
   access: ResolvedListAccessControl;
-  hooks: ListHooks<BaseListTypeInfo>;
-  adminUILabels: { label: string; singular: string; path: string };
+  hooks: ListHooks<BaseStandardListTypeInfo>;
+  adminUILabels: { label: string; singular: string; plural: string; path: string };
   cacheHint: ((args: CacheHintArgs) => CacheHint) | undefined;
   listKey: string;
-  lists: Record<string, InitialisedListOrSingleton>;
+  lists: Record<string, InitialisedList>;
   dbMap: string | undefined;
-};
-
-export type InitialisedSingleton = {
-  kind: 'singleton';
-  hooks: ListHooks<BaseListTypeInfo>;
-  adminUILabels: { label: string; singular: string; path: string };
-  maxResults: 1;
-  graphql: {
-    isEnabled: {
-      type: boolean;
-      query: boolean;
-      create: false;
-      update: boolean;
-      delete: false;
-    };
-  };
-} & CommonInitialisedList;
-
-export type InitialisedList = {
-  kind: 'list';
   pluralGraphQLName: string;
   types: GraphQLTypesForList;
   maxResults: number;
   graphql: {
     isEnabled: IsEnabled;
   };
-} & CommonInitialisedList;
+};
 
-export type InitialisedListOrSingleton = InitialisedList | InitialisedSingleton;
+export type InitialisedSingleton = { kind: 'singleton' } & CommonInitialisedList;
+
+export type InitialisedStandardList = { kind: 'list' } & CommonInitialisedList;
+
+export type InitialisedList = InitialisedStandardList | InitialisedSingleton;
 
 type IsEnabled = {
   type: boolean;
@@ -89,8 +77,8 @@ type IsEnabled = {
   create: boolean;
   update: boolean;
   delete: boolean;
-  filter: boolean | ((args: FilterOrderArgs<BaseListTypeInfo>) => MaybePromise<boolean>);
-  orderBy: boolean | ((args: FilterOrderArgs<BaseListTypeInfo>) => MaybePromise<boolean>);
+  filter: boolean | ((args: FilterOrderArgs<BaseStandardListTypeInfo>) => MaybePromise<boolean>);
+  orderBy: boolean | ((args: FilterOrderArgs<BaseStandardListTypeInfo>) => MaybePromise<boolean>);
 };
 
 function throwIfNotAFilter(x: unknown, listKey: string, fieldKey: string) {
@@ -142,7 +130,7 @@ function getIsEnabled(listsConfig: KeystoneConfig['lists']) {
         query: !omit.includes('query'),
         create: !omit.includes('create'),
         update: !omit.includes('update'),
-        delete: !omit.includes('delete'),
+        delete: listConfig.kind === 'list' && !(omit as readonly string[]).includes('delete'),
         filter: defaultIsFilterable ?? listConfig.kind === 'list',
         orderBy: defaultIsOrderable ?? listConfig.kind === 'list',
       };
@@ -218,7 +206,7 @@ function getListsWithInitialisedFields(
 
 function getListGraphqlTypes(
   listsConfig: KeystoneConfig['lists'],
-  lists: Record<string, InitialisedListOrSingleton>,
+  lists: Record<string, InitialisedList>,
   intermediateLists: Record<string, { graphql: { isEnabled: IsEnabled } }>
 ): Record<string, ListGraphQLTypes> {
   const graphQLTypes: Record<string, ListGraphQLTypes> = {};
@@ -419,45 +407,32 @@ function getListGraphqlTypes(
       });
     }
 
-    if (listConfig.kind === 'list') {
-      graphQLTypes[listKey] = {
-        types: {
-          output,
-          uniqueWhere,
-          where,
-          create,
-          orderBy,
-          update,
-          findManyArgs,
-          relateTo: {
-            many: {
-              where: graphql.inputObject({
-                name: `${listKey}ManyRelationFilter`,
-                fields: {
-                  every: graphql.arg({ type: where }),
-                  some: graphql.arg({ type: where }),
-                  none: graphql.arg({ type: where }),
-                },
-              }),
-              create: relateToManyForCreate,
-              update: relateToManyForUpdate,
-            },
-            one: { create: relateToOneForCreate, update: relateToOneForUpdate },
+    graphQLTypes[listKey] = {
+      types: {
+        output,
+        uniqueWhere,
+        where,
+        create,
+        orderBy,
+        update,
+        findManyArgs,
+        relateTo: {
+          many: {
+            where: graphql.inputObject({
+              name: `${listKey}ManyRelationFilter`,
+              fields: {
+                every: graphql.arg({ type: where }),
+                some: graphql.arg({ type: where }),
+                none: graphql.arg({ type: where }),
+              },
+            }),
+            create: relateToManyForCreate,
+            update: relateToManyForUpdate,
           },
+          one: { create: relateToOneForCreate, update: relateToOneForUpdate },
         },
-      };
-    } else {
-      graphQLTypes[listKey] = {
-        types: {
-          output,
-          create,
-          update,
-          relateTo: {
-            one: { create: relateToOneForCreate, update: relateToOneForUpdate },
-          },
-        },
-      };
-    }
+      },
+    };
   }
 
   return graphQLTypes;
@@ -471,9 +446,7 @@ function getListGraphqlTypes(
  * 5. Handle relationships - ensure correct linking between two sides of all relationships (including one-sided relationships)
  * 6.
  */
-export function initialiseLists(
-  config: KeystoneConfig
-): Record<string, InitialisedListOrSingleton> {
+export function initialiseLists(config: KeystoneConfig): Record<string, InitialisedList> {
   const listsConfig = config.lists;
 
   let intermediateLists;
@@ -491,7 +464,7 @@ export function initialiseLists(
    *
    * The object will be populated at the end of this function, and the reference will be maintained
    */
-  const listsRef: Record<string, InitialisedListOrSingleton> = {};
+  const listsRef: Record<string, InitialisedList> = {};
   /** Block statements to contain variables only being used within them */
   {
     const listGraphqlTypes = getListGraphqlTypes(listsConfig, listsRef, intermediateLists);
@@ -549,19 +522,23 @@ export function initialiseLists(
   }
 
   for (const [listKey, intermediateList] of Object.entries(intermediateLists)) {
+    const listConfig = listsConfig[listKey];
     listsRef[listKey] = {
       ...intermediateList,
       /** These properties weren't related to any of the above actions but need to be here */
       hooks: intermediateList.hooks || {},
-      kind: listsConfig[listKey].kind,
+      kind: listConfig.kind,
       cacheHint: (() => {
-        const cacheHint = listsConfig[listKey].graphql?.cacheHint;
+        const cacheHint = listConfig.graphql?.cacheHint;
         if (cacheHint === undefined) {
           return undefined;
         }
         return typeof cacheHint === 'function' ? cacheHint : () => cacheHint;
       })(),
-      maxResults: listsConfig[listKey].graphql?.queryLimits?.maxResults ?? Infinity,
+      maxResults:
+        listConfig.kind === 'singleton'
+          ? 1
+          : listConfig.graphql?.queryLimits?.maxResults ?? Infinity,
       listKey,
       /** Add self-reference */
       lists: listsRef,

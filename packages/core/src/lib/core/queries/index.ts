@@ -1,9 +1,9 @@
 import { getGqlNames } from '../../../types';
 import { graphql } from '../../..';
-import { InitialisedListOrSingleton } from '../types-for-lists';
+import { InitialisedList } from '../types-for-lists';
 import * as queries from './resolvers';
 
-export function getQueriesForList(list: InitialisedListOrSingleton) {
+export function getQueriesForList(list: InitialisedList) {
   if (!list.graphql.isEnabled.query) return {};
   const names = getGqlNames(list);
 

@@ -1,7 +1,7 @@
 import url from 'url';
 import {
   AdminFileToWrite,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   KeystoneConfig,
   KeystoneContext,
   AdminUIConfig,
@@ -20,7 +20,7 @@ import { initTemplate } from './templates/init';
  *
  * Generates config for Keystone to implement standard auth features.
  */
-export function createAuth<ListTypeInfo extends BaseListTypeInfo>({
+export function createAuth<ListTypeInfo extends BaseStandardListTypeInfo>({
   listKey,
   secretField,
   initFirstItem,

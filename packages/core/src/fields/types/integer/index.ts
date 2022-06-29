@@ -1,6 +1,6 @@
 import { humanize } from '../../../lib/utils';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   fieldType,
   FieldTypeFunc,
   CommonFieldConfig,
@@ -15,7 +15,7 @@ import {
 } from '../../non-null-graphql';
 import { resolveView } from '../../resolve-view';
 
-export type IntegerFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type IntegerFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     isIndexed?: boolean | 'unique';
     defaultValue?: number | { kind: 'autoincrement' };
@@ -43,7 +43,7 @@ const MAX_INT = 2147483647;
 const MIN_INT = -2147483648;
 
 export const integer =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     isIndexed,
     defaultValue: _defaultValue,
     validation,

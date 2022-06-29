@@ -1,7 +1,7 @@
 import { KeystoneContext, GraphQLTypesForList } from '../../../types';
 import { graphql } from '../../..';
 import { UniqueInputFilter } from '../where-inputs';
-import { InitialisedList } from '../types-for-lists';
+import { InitialisedStandardList } from '../types-for-lists';
 import { isRejected, isFulfilled } from '../utils';
 import { userInputError } from '../graphql-errors';
 import { NestedMutationState } from './create-update';
@@ -32,7 +32,7 @@ export class RelationshipErrors extends Error {
 function getResolvedUniqueWheres(
   uniqueInputs: UniqueInputFilter[],
   context: KeystoneContext,
-  foreignList: InitialisedList,
+  foreignList: InitialisedStandardList,
   operation: string
 ) {
   return uniqueInputs.map(uniqueInput =>
@@ -43,7 +43,7 @@ function getResolvedUniqueWheres(
 export function resolveRelateToManyForCreateInput(
   nestedMutationState: NestedMutationState,
   context: KeystoneContext,
-  foreignList: InitialisedList,
+  foreignList: InitialisedStandardList,
   tag: string
 ) {
   return async (value: _CreateValueType) => {
@@ -83,7 +83,7 @@ export function resolveRelateToManyForCreateInput(
 export function resolveRelateToManyForUpdateInput(
   nestedMutationState: NestedMutationState,
   context: KeystoneContext,
-  foreignList: InitialisedList,
+  foreignList: InitialisedStandardList,
   tag: string
 ) {
   return async (value: _UpdateValueType) => {

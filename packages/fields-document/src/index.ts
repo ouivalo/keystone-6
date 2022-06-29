@@ -1,7 +1,7 @@
 import path from 'path';
 import { ApolloError } from 'apollo-server-errors';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   CommonFieldConfig,
   FieldData,
   FieldTypeFunc,
@@ -61,7 +61,7 @@ type FormattingConfig = {
   softBreaks?: true;
 };
 
-export type DocumentFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type DocumentFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     relationships?: RelationshipsConfig;
     componentBlocks?: Record<string, ComponentBlock>;
@@ -75,7 +75,7 @@ export type DocumentFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
 const views = path.join(path.dirname(__dirname), 'views');
 
 export const document =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     componentBlocks = {},
     dividers,
     formatting,
@@ -181,7 +181,7 @@ export const document =
   };
 
 function normaliseRelationships(
-  configRelationships: DocumentFieldConfig<BaseListTypeInfo>['relationships'],
+  configRelationships: DocumentFieldConfig<BaseStandardListTypeInfo>['relationships'],
   meta: FieldData
 ) {
   const relationships: Relationships = {};
@@ -201,7 +201,7 @@ function normaliseRelationships(
 
 function normaliseDocumentFeatures(
   config: Pick<
-    DocumentFieldConfig<BaseListTypeInfo>,
+    DocumentFieldConfig<BaseStandardListTypeInfo>,
     'formatting' | 'dividers' | 'layouts' | 'links'
   >
 ) {

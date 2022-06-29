@@ -1,6 +1,6 @@
 import { KeystoneContext, GraphQLTypesForList } from '../../../types';
 import { graphql } from '../../..';
-import { InitialisedList } from '../types-for-lists';
+import { InitialisedStandardList } from '../types-for-lists';
 import { userInputError } from '../graphql-errors';
 import { NestedMutationState } from './create-update';
 import { checkUniqueItemExists } from './access-control';
@@ -24,7 +24,7 @@ async function handleCreateAndUpdate(
   value: _CreateValueType,
   nestedMutationState: NestedMutationState,
   context: KeystoneContext,
-  foreignList: InitialisedList
+  foreignList: InitialisedStandardList
 ) {
   if (value.connect) {
     return { connect: await checkUniqueItemExists(value.connect, foreignList, context, 'connect') };
@@ -37,7 +37,7 @@ async function handleCreateAndUpdate(
 export function resolveRelateToOneForCreateInput(
   nestedMutationState: NestedMutationState,
   context: KeystoneContext,
-  foreignList: InitialisedList
+  foreignList: InitialisedStandardList
 ) {
   return async (value: _CreateValueType) => {
     const numOfKeys = Object.keys(value).length;
@@ -53,7 +53,7 @@ export function resolveRelateToOneForCreateInput(
 export function resolveRelateToOneForUpdateInput(
   nestedMutationState: NestedMutationState,
   context: KeystoneContext,
-  foreignList: InitialisedList
+  foreignList: InitialisedStandardList
 ) {
   return async (value: _UpdateValueType) => {
     if (Object.keys(value).length !== 1) {

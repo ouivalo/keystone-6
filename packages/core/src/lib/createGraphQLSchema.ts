@@ -1,11 +1,11 @@
 import type { KeystoneConfig, AdminMetaRootVal } from '../types';
 import { getAdminMetaSchema } from '../admin-ui/system';
 import { graphql } from '../types/schema';
-import { InitialisedListOrSingleton } from './core/types-for-lists';
+import { InitialisedList } from './core/types-for-lists';
 import { getGraphQLSchema } from './core/graphql-schema';
 export function createGraphQLSchema(
   config: KeystoneConfig,
-  lists: Record<string, InitialisedListOrSingleton>,
+  lists: Record<string, InitialisedList>,
   adminMeta: AdminMetaRootVal
 ) {
   // console.log(adminMeta);

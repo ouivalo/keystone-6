@@ -1,5 +1,5 @@
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   FieldTypeFunc,
   CommonFieldConfig,
   fieldType,
@@ -66,7 +66,7 @@ type ManyDbConfig = {
   };
 };
 
-export type RelationshipFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type RelationshipFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     many?: boolean;
     ref: string;
@@ -77,7 +77,7 @@ export type RelationshipFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
     (SelectDisplayConfig | CardsDisplayConfig | CountDisplayConfig);
 
 export const relationship =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     ref,
     ...config
   }: RelationshipFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>

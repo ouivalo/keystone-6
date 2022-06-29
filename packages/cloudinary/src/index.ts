@@ -1,7 +1,7 @@
 import path from 'path';
 import {
   CommonFieldConfig,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   FieldTypeFunc,
   jsonFieldTypePolyfilledForSQLite,
 } from '@keystone-6/core/types';
@@ -20,7 +20,7 @@ type StoredFile = {
   _meta: cloudinary.UploadApiResponse;
 };
 
-type CloudinaryImageFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+type CloudinaryImageFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> & {
     cloudinary: {
       cloudName: string;
@@ -107,7 +107,7 @@ export const outputType = graphql.object<CloudinaryImage_File>()({
 });
 
 export const cloudinaryImage =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     cloudinary,
     ...config
   }: CloudinaryImageFieldConfig<ListTypeInfo>): FieldTypeFunc<ListTypeInfo> =>

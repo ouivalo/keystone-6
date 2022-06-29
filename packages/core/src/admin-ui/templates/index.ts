@@ -52,9 +52,10 @@ export const writeAdminFiles = (
       outputPath: 'pages/_app.js',
     },
     { mode: 'write', src: homeTemplate, outputPath: 'pages/index.js' },
-    ...adminMeta.lists.flatMap(({ path, key }): AdminFileToWrite[] => [
-      { mode: 'write', src: listTemplate(key), outputPath: `pages/${path}/index.js` },
-      { mode: 'write', src: singletonTemplate(key), outputPath: `pages/${path}/index.js` },
+    ...adminMeta.lists.flatMap(({ path, key, kind }): AdminFileToWrite[] => [
+      kind === 'list'
+        ? { mode: 'write', src: listTemplate(key), outputPath: `pages/${path}/index.js` }
+        : { mode: 'write', src: singletonTemplate(key), outputPath: `pages/${path}/index.js` },
       { mode: 'write', src: itemTemplate(key), outputPath: `pages/${path}/[id].js` },
       { mode: 'write', src: createItemTemplate(key), outputPath: `pages/${path}/create.js` },
     ]),

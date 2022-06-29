@@ -1,10 +1,6 @@
 import { KeystoneContext, BaseItem } from '../../../types';
 import { ResolvedDBField } from '../resolve-relationships';
-import {
-  InitialisedList,
-  InitialisedListOrSingleton,
-  InitialisedSingleton,
-} from '../types-for-lists';
+import { InitialisedStandardList, InitialisedList, InitialisedSingleton } from '../types-for-lists';
 import {
   promiseAllRejectWithAllErrors,
   getDBFieldKeyForFieldOnMultiField,
@@ -36,7 +32,7 @@ import { validateUpdateCreate } from './validation';
 
 async function createSingle(
   { data: rawData }: { data: Record<string, any> },
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   context: KeystoneContext,
   operationAccess: boolean
 ) {
@@ -72,7 +68,7 @@ export class NestedMutationState {
   constructor(context: KeystoneContext) {
     this.#context = context;
   }
-  async create(data: Record<string, any>, list: InitialisedList) {
+  async create(data: Record<string, any>, list: InitialisedStandardList) {
     const context = this.#context;
 
     // Check operation permission to pass into single operation
@@ -91,7 +87,7 @@ export class NestedMutationState {
 
 export async function createOne(
   createInput: { data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -106,7 +102,7 @@ export async function createOne(
 
 export async function createMany(
   createInputs: { data: Record<string, any>[] },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -166,7 +162,7 @@ async function updateSingleton(
 
 async function updateSingle(
   updateInput: { where: UniqueInputFilter; data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   accessFilters: boolean | InputFilter,
   operationAccess: boolean
@@ -215,7 +211,7 @@ async function updateSingle(
 
 export async function updateOne(
   updateInput: { where: UniqueInputFilter; data: Record<string, any> },
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -224,16 +220,12 @@ export async function updateOne(
   // Get list-level access control filters
   const accessFilters = await getAccessFilters(list, context, 'update');
 
-  if (list.kind === 'singleton') {
-    return updateSingleton(updateInput, list, context, accessFilters, operationAccess);
-  }
-
   return updateSingle(updateInput, list, context, accessFilters, operationAccess);
 }
 
 export async function updateMany(
   { data }: { data: { where: UniqueInputFilter; data: Record<string, any> }[] },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -248,7 +240,7 @@ export async function updateMany(
 }
 
 async function getResolvedData(
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   hookArgs: {
     context: KeystoneContext;
     listKey: string;
@@ -384,7 +376,7 @@ async function getResolvedData(
 }
 
 async function resolveInputForCreateOrUpdate(
-  list: InitialisedListOrSingleton,
+  list: InitialisedList,
   context: KeystoneContext,
   inputData: Record<string, any>,
   item: BaseItem | undefined

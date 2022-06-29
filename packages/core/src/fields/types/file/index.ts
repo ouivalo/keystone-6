@@ -3,14 +3,14 @@ import {
   fieldType,
   FieldTypeFunc,
   CommonFieldConfig,
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   KeystoneContext,
   FileMetadata,
 } from '../../../types';
 import { graphql } from '../../..';
 import { resolveView } from '../../resolve-view';
 
-export type FileFieldConfig<ListTypeInfo extends BaseListTypeInfo> = {
+export type FileFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> = {
   storage: string;
 } & CommonFieldConfig<ListTypeInfo>;
 
@@ -46,7 +46,7 @@ async function inputResolver(storage: string, data: FileFieldInputType, context:
 }
 
 export const file =
-  <ListTypeInfo extends BaseListTypeInfo>(
+  <ListTypeInfo extends BaseStandardListTypeInfo>(
     config: FileFieldConfig<ListTypeInfo>
   ): FieldTypeFunc<ListTypeInfo> =>
   meta => {

@@ -1,6 +1,6 @@
 import { DBField, KeystoneContext } from '../../types';
 import { userInputError } from './graphql-errors';
-import { InitialisedList } from './types-for-lists';
+import { InitialisedStandardList } from './types-for-lists';
 import { getDBFieldKeyForFieldOnMultiField } from './utils';
 
 export type InputFilter = Record<string, any> & {
@@ -29,7 +29,7 @@ export type UniquePrismaFilter = Record<string, any> & {
 
 export async function resolveUniqueWhereInput(
   input: UniqueInputFilter,
-  fields: InitialisedList['fields'],
+  fields: InitialisedStandardList['fields'],
   context: KeystoneContext
 ): Promise<UniquePrismaFilter> {
   const inputKeys = Object.keys(input);
@@ -49,7 +49,7 @@ export async function resolveUniqueWhereInput(
 
 export async function resolveWhereInput(
   inputFilter: InputFilter,
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext
 ): Promise<PrismaFilter> {
   return {

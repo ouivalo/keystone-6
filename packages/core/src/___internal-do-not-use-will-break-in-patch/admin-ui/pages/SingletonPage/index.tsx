@@ -24,7 +24,6 @@ import { Notice } from '@keystone-ui/notice';
 import { useToasts } from '@keystone-ui/toast';
 import { Tooltip } from '@keystone-ui/tooltip';
 import { FieldLabel, TextInput } from '@keystone-ui/fields';
-import { ListMeta } from '../../../../types';
 import {
   DataGetter,
   DeepNullable,
@@ -41,7 +40,7 @@ import { useList } from '../../../../admin-ui/context';
 import { PageContainer, HEADER_HEIGHT } from '../../../../admin-ui/components/PageContainer';
 import { GraphQLErrorNotice } from '../../../../admin-ui/components/GraphQLErrorNotice';
 import { usePreventNavigation } from '../../../../admin-ui/utils/usePreventNavigation';
-import { BaseToolbar, ColumnLayout, ItemPageHeader } from './common';
+import { BaseToolbar, ColumnLayout, ItemPageHeader } from '../ItemPage/common';
 
 type ItemPageProps = {
   listKey: string;
@@ -74,13 +73,7 @@ function ItemForm({
   const list = useList(listKey);
 
   const [update, { loading, error, data }] = useMutation(
-    list.kind === 'list'
-      ? gql`mutation ($data: ${list.gqlNames.updateInputName}!, $id: ID!) {
-      item: ${list.gqlNames.updateMutationName}(where: { id: $id }, data: $data) {
-        ${selectedFields}
-      }
-    }`
-      : gql`mutation ($data: ${list.gqlNames.updateInputName}!) {
+    gql`mutation ($data: ${list.gqlNames.updateInputName}!) {
       item: ${list.gqlNames.updateMutationName}(data: $data) {
         ${selectedFields}
       }
@@ -186,91 +179,8 @@ function ItemForm({
           }));
         })}
         loading={loading}
-        deleteButton={useMemo(
-          () =>
-            showDelete ? (
-              <DeleteButton
-                list={list}
-                itemLabel={(labelFieldValue ?? itemId) as string}
-                itemId={itemId}
-              />
-            ) : undefined,
-          [showDelete, list, labelFieldValue, itemId]
-        )}
       />
     </Box>
-  );
-}
-
-function DeleteButton({
-  itemLabel,
-  itemId,
-  list,
-}: {
-  itemLabel: string;
-  itemId: string;
-  list: ListMeta;
-}) {
-  const toasts = useToasts();
-  const [deleteItem, { loading }] = useMutation(
-    gql`mutation ($id: ID!) {
-      ${list.gqlNames.deleteMutationName}(where: { id: $id }) {
-        id
-      }
-    }`,
-    { variables: { id: itemId } }
-  );
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  return (
-    <Fragment>
-      <Button
-        tone="negative"
-        onClick={() => {
-          setIsOpen(true);
-        }}
-      >
-        Delete
-      </Button>
-      <AlertDialog
-        // TODO: change the copy in the title and body of the modal
-        title="Delete Confirmation"
-        isOpen={isOpen}
-        tone="negative"
-        actions={{
-          confirm: {
-            label: 'Delete',
-            action: async () => {
-              try {
-                await deleteItem();
-              } catch (err: any) {
-                return toasts.addToast({
-                  title: `Failed to delete ${list.singular} item: ${itemLabel}`,
-                  message: err.message,
-                  tone: 'negative',
-                });
-              }
-              router.push(`/${list.path}`);
-              return toasts.addToast({
-                title: itemLabel,
-                message: `Deleted ${list.singular} item successfully`,
-                tone: 'positive',
-              });
-            },
-            loading,
-          },
-          cancel: {
-            label: 'Cancel',
-            action: () => {
-              setIsOpen(false);
-            },
-          },
-        }}
-      >
-        Are you sure you want to delete <strong>{itemLabel}</strong>?
-      </AlertDialog>
-    </Fragment>
   );
 }
 
@@ -298,14 +208,13 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
       selectedFields,
       query: gql`
         query ItemPage($id: ID!, $listKey: String!) {
-          item: ${list.gqlNames.itemQueryName}${list.kind === 'list' ? `(where: {id: $id})` : ''} {
+          item: ${list.gqlNames.itemQueryName} {
             ${selectedFields}
           }
           keystone {
             adminMeta {
               list(key: $listKey) {
                 hideCreate
-                hideDelete
                 fields {
                   path
                   itemView(id: $id) {

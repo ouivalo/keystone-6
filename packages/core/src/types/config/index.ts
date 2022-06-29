@@ -17,13 +17,13 @@ import { SessionStrategy } from '../session';
 import type { MaybePromise } from '../utils';
 import type {
   ListOrSingletonSchemaConfig,
-  ListConfig,
+  StandardListConfig,
   MaybeSessionFunction,
   MaybeItemFunction,
   IdFieldConfig,
 } from './lists';
 import type { BaseFields } from './fields';
-import type { ListAccessControl, FieldAccessControl } from './access-control';
+import type { StandardListAccessControl, FieldAccessControl } from './access-control';
 import type { ListHooks } from './hooks';
 
 type FileOrImage =
@@ -119,7 +119,7 @@ export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneT
 
 export type {
   ListOrSingletonSchemaConfig as ListSchemaConfig,
-  ListConfig,
+  StandardListConfig as ListConfig,
   BaseFields,
   MaybeSessionFunction,
   MaybeItemFunction,
@@ -288,7 +288,7 @@ export type ImagesConfig = {
 
 // Exports from sibling packages
 
-export type { ListHooks, ListAccessControl, FieldAccessControl };
+export type { ListHooks, StandardListAccessControl as ListAccessControl, FieldAccessControl };
 
 export type {
   FieldCreateItemAccessArgs,

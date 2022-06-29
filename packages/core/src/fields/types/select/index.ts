@@ -1,7 +1,7 @@
 import inflection from 'inflection';
 import { humanize } from '../../../lib/utils';
 import {
-  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
   fieldType,
   FieldTypeFunc,
   CommonFieldConfig,
@@ -16,7 +16,7 @@ import {
 } from '../../non-null-graphql';
 import { resolveView } from '../../resolve-view';
 
-export type SelectFieldConfig<ListTypeInfo extends BaseListTypeInfo> =
+export type SelectFieldConfig<ListTypeInfo extends BaseStandardListTypeInfo> =
   CommonFieldConfig<ListTypeInfo> &
     (
       | {
@@ -67,7 +67,7 @@ const MAX_INT = 2147483647;
 const MIN_INT = -2147483648;
 
 export const select =
-  <ListTypeInfo extends BaseListTypeInfo>({
+  <ListTypeInfo extends BaseStandardListTypeInfo>({
     isIndexed,
     ui: { displayMode = 'select', ...ui } = {},
     defaultValue,

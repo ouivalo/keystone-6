@@ -1,6 +1,6 @@
 import type { MaybePromise } from '../utils';
 import type { KeystoneContextFromListTypeInfo } from '..';
-import { BaseListTypeInfo } from '../type-info';
+import { BaseStandardListTypeInfo, BaseSingletonTypeInfo, BaseListTypeInfo } from '../type-info';
 
 type BaseAccessArgs<ListTypeInfo extends BaseListTypeInfo> = {
   session: any;
@@ -10,13 +10,13 @@ type BaseAccessArgs<ListTypeInfo extends BaseListTypeInfo> = {
 
 // List Filter Access
 
-type FilterOutput<ListTypeInfo extends BaseListTypeInfo> =
+type FilterOutput<ListTypeInfo extends BaseStandardListTypeInfo> =
   | boolean
   | ListTypeInfo['inputs']['where'];
 
 export type ListFilterAccessControl<
   Operation extends 'query' | 'update' | 'delete',
-  ListTypeInfo extends BaseListTypeInfo
+  ListTypeInfo extends BaseStandardListTypeInfo
 > = (
   args: BaseAccessArgs<ListTypeInfo> & { operation: Operation }
 ) => MaybePromise<FilterOutput<ListTypeInfo>>;
@@ -31,7 +31,7 @@ type CreateItemAccessArgs<ListTypeInfo extends BaseListTypeInfo> = BaseAccessArg
   inputData: ListTypeInfo['inputs']['create'];
 };
 
-export type CreateListItemAccessControl<ListTypeInfo extends BaseListTypeInfo> = (
+export type CreateListItemAccessControl<ListTypeInfo extends BaseStandardListTypeInfo> = (
   args: CreateItemAccessArgs<ListTypeInfo>
 ) => MaybePromise<boolean>;
 
@@ -51,15 +51,16 @@ export type UpdateListItemAccessControl<ListTypeInfo extends BaseListTypeInfo> =
   args: UpdateItemAccessArgs<ListTypeInfo>
 ) => MaybePromise<boolean>;
 
-type DeleteItemAccessArgs<ListTypeInfo extends BaseListTypeInfo> = BaseAccessArgs<ListTypeInfo> & {
-  operation: 'delete';
-  /**
-   * The item being deleted
-   */
-  item: ListTypeInfo['item'];
-};
+type DeleteItemAccessArgs<ListTypeInfo extends BaseStandardListTypeInfo> =
+  BaseAccessArgs<ListTypeInfo> & {
+    operation: 'delete';
+    /**
+     * The item being deleted
+     */
+    item: ListTypeInfo['item'];
+  };
 
-export type DeleteListItemAccessControl<ListTypeInfo extends BaseListTypeInfo> = (
+export type DeleteListItemAccessControl<ListTypeInfo extends BaseStandardListTypeInfo> = (
   args: DeleteItemAccessArgs<ListTypeInfo>
 ) => MaybePromise<boolean>;
 
@@ -86,7 +87,7 @@ export type ListOperationAccessControl<
 //     - Many item queries will filter out those items which have access denied, with no errors.
 //     - Count queries will only count those items for which access is not denied, with no errors.
 //
-export type ListAccessControl<ListTypeInfo extends BaseListTypeInfo> = {
+export type StandardListAccessControl<ListTypeInfo extends BaseStandardListTypeInfo> = {
   // These functions should return `true` if access is allowed or `false` if access is denied.
   operation?: {
     query?: ListOperationAccessControl<'query', ListTypeInfo>;
@@ -117,6 +118,30 @@ export type ListAccessControl<ListTypeInfo extends BaseListTypeInfo> = {
   };
 };
 
+type ReadItemAccessArgs<ListTypeInfo extends BaseSingletonTypeInfo> =
+  BaseAccessArgs<ListTypeInfo> & {
+    operation: 'read';
+    /**
+     * The item being read
+     */
+    item: ListTypeInfo['item'];
+  };
+
+export type SingletonListAccessControl<ListTypeInfo extends BaseSingletonTypeInfo> = {
+  // These functions should return `true` if access is allowed or `false` if access is denied.
+  operation?: {
+    query?: ListOperationAccessControl<'query', ListTypeInfo>;
+    update?: ListOperationAccessControl<'update', ListTypeInfo>;
+  };
+
+  // These rules are applied to each item being operated on individually. They return `true` or `false`,
+  // and if false, an access denied error will be returned for the individual operation.
+  item?: {
+    read: ReadItemAccessArgs<ListTypeInfo>;
+    update?: UpdateListItemAccessControl<ListTypeInfo>;
+  };
+};
+
 // Field Access
 export type IndividualFieldAccessControl<Args> = (args: Args) => MaybePromise<boolean>;
 
@@ -138,8 +163,6 @@ export type FieldAccessControl<ListTypeInfo extends BaseListTypeInfo> =
       read?: IndividualFieldAccessControl<FieldReadItemAccessArgs<ListTypeInfo>>;
       create?: IndividualFieldAccessControl<FieldCreateItemAccessArgs<ListTypeInfo>>;
       update?: IndividualFieldAccessControl<FieldUpdateItemAccessArgs<ListTypeInfo>>;
-      // filter?: COMING SOON
-      // orderBy?: COMING SOON
     }
   | IndividualFieldAccessControl<
       | FieldCreateItemAccessArgs<ListTypeInfo>
