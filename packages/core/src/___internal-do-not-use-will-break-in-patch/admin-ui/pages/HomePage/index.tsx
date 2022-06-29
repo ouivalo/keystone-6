@@ -30,7 +30,7 @@ const ListCard = ({ listKey, count, hideCreate, kind }: ListCardProps) => {
   return (
     <div css={{ position: 'relative' }}>
       <Link
-        href={`/${list.path}${list.kind === 'singleton' && '/singleton'}`}
+        href={`/${list.path}${list.kind === 'singleton' ? '/singleton' : ''}`}
         css={{
           backgroundColor: colors.background,
           borderColor: colors.border,

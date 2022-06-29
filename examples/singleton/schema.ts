@@ -133,3 +133,7 @@ export const lists: Lists = {
     },
   }),
 };
+
+// remove item id
+// remove create, fix how it's started
+// generate singleton item page

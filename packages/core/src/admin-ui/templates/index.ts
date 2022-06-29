@@ -6,6 +6,7 @@ import { homeTemplate } from './home';
 import { listTemplate } from './list';
 import { itemTemplate } from './item';
 import { apiTemplate } from './api';
+import { singletonTemplate } from './singleton';
 import { noAccessTemplate } from './no-access';
 import { createItemTemplate } from './create-item';
 
@@ -53,6 +54,7 @@ export const writeAdminFiles = (
     { mode: 'write', src: homeTemplate, outputPath: 'pages/index.js' },
     ...adminMeta.lists.flatMap(({ path, key }): AdminFileToWrite[] => [
       { mode: 'write', src: listTemplate(key), outputPath: `pages/${path}/index.js` },
+      { mode: 'write', src: singletonTemplate(key), outputPath: `pages/${path}/index.js` },
       { mode: 'write', src: itemTemplate(key), outputPath: `pages/${path}/[id].js` },
       { mode: 'write', src: createItemTemplate(key), outputPath: `pages/${path}/create.js` },
     ]),

@@ -1,6 +1,6 @@
 import { getGqlNames } from '../../../types';
 import { graphql } from '../../..';
-import { InitialisedListOrSingleton } from '../types-for-lists';
+import { InitialisedList } from '../types-for-lists';
 import * as createAndUpdate from './create-update';
 import * as deletes from './delete';
 
@@ -20,17 +20,7 @@ function promisesButSettledWhenAllSettledAndInOrder<T extends Promise<unknown>[]
   }) as T;
 }
 
-export function getMutationsForList(list: InitialisedListOrSingleton) {
-  const names = getGqlNames(list);
-
-  const createOne = graphql.field({
-    type: list.types.output,
-    args: { data: graphql.arg({ type: graphql.nonNull(list.types.create) }) },
-    resolve(_rootVal, { data }, context) {
-      return createAndUpdate.createOne({ data }, list, context);
-    },
-  });
-
+export function getMutationsForList(list: InitialisedList) {
   const updateOne = graphql.field({
     type: list.types.output,
     args:
@@ -48,15 +38,20 @@ export function getMutationsForList(list: InitialisedListOrSingleton) {
   if (list.kind === 'singleton') {
     return {
       mutations: {
-        ...(list.graphql.isEnabled.create && {
-          [names.createMutationName]: createOne,
-        }),
         ...(list.graphql.isEnabled.update && {
           [names.updateMutationName]: updateOne,
         }),
       },
     };
   }
+
+  const createOne = graphql.field({
+    type: list.types.output,
+    args: { data: graphql.arg({ type: graphql.nonNull(list.types.create) }) },
+    resolve(_rootVal, { data }, context) {
+      return createAndUpdate.createOne({ data }, list, context);
+    },
+  });
 
   const createMany = graphql.field({
     type: graphql.list(list.types.output),
