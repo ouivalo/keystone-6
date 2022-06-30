@@ -272,12 +272,13 @@ type KeystoneAdminUIListMeta {
   key: String!
   itemQueryName: String!
   listQueryName: String!
+  plural: String!
   hideCreate: Boolean!
   hideDelete: Boolean!
   path: String!
   label: String!
   singular: String!
-  plural: String!
+  kind: kind!
   description: String
   initialColumns: [String!]!
   pageSize: Int!
@@ -285,6 +286,11 @@ type KeystoneAdminUIListMeta {
   fields: [KeystoneAdminUIFieldMeta!]!
   initialSort: KeystoneAdminUISort
   isHidden: Boolean!
+}
+
+enum kind {
+  list
+  singleton
 }
 
 type KeystoneAdminUIFieldMeta {

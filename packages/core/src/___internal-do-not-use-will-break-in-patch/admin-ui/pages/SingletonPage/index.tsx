@@ -2,7 +2,6 @@
 /** @jsx jsx */
 
 import copyToClipboard from 'clipboard-copy';
-import { useRouter } from 'next/router';
 import {
   Fragment,
   HTMLAttributes,
@@ -62,7 +61,6 @@ function ItemForm({
   itemGetter,
   selectedFields,
   fieldModes,
-  showDelete,
 }: {
   listKey: string;
   itemGetter: DataGetter<ItemData>;
@@ -144,8 +142,6 @@ function ItemForm({
         toasts.addToast({ title: 'Failed to update item', tone: 'negative', message: err.message });
       });
   });
-  const labelFieldValue = state.item.data?.[list.labelField];
-  const itemId = state.item.data?.id!;
   const hasChangedFields = !!changedFields.size;
   usePreventNavigation(useMemo(() => ({ current: hasChangedFields }), [hasChangedFields]));
   return (
@@ -184,12 +180,10 @@ function ItemForm({
   );
 }
 
-export const getItemPage = (props: ItemPageProps) => () => <ItemPage {...props} />;
+export const getSingletonPage = (props: ItemPageProps) => () => <ItemPage {...props} />;
 
 const ItemPage = ({ listKey }: ItemPageProps) => {
   const list = useList(listKey);
-  const id = useRouter().query.id as string;
-
   const { spacing, typography } = useTheme();
 
   const { query, selectedFields } = useMemo(() => {
@@ -207,7 +201,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
     return {
       selectedFields,
       query: gql`
-        query ItemPage($id: ID!, $listKey: String!) {
+        query ItemPage($listKey: String!) {
           item: ${list.gqlNames.itemQueryName} {
             ${selectedFields}
           }
@@ -217,7 +211,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
                 hideCreate
                 fields {
                   path
-                  itemView(id: $id) {
+                  itemView(id: "cl4xol6g50002d8irovdpfpya") {
                     fieldMode
                   }
                 }
@@ -230,11 +224,9 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
   }, [list]);
 
   let { data, error, loading } = useQuery(query, {
-    variables: { id, listKey },
+    variables: { listKey },
     errorPolicy: 'all',
-    skip: id === undefined,
   });
-  loading ||= id === undefined;
 
   const dataGetter = makeDataGetter<
     DeepNullable<{
@@ -249,6 +241,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
 
   let itemViewFieldModesByField = useMemo(() => {
     let itemViewFieldModesByField: Record<string, 'edit' | 'read' | 'hidden'> = {};
+    console.log(dataGetter.data?.keystone?.adminMeta?.list?.fields);
     dataGetter.data?.keystone?.adminMeta?.list?.fields?.forEach(field => {
       if (field !== null && field.path !== null && field?.itemView?.fieldMode != null) {
         itemViewFieldModesByField[field.path] = field.itemView.fieldMode;
@@ -257,11 +250,14 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
     return itemViewFieldModesByField;
   }, [dataGetter.data?.keystone?.adminMeta?.list?.fields]);
 
+  console.log({ itemViewFieldModesByField });
+
   const metaQueryErrors = dataGetter.get('keystone').errors;
 
+  // TODO page title on singletons
   const pageTitle: string = loading
     ? undefined
-    : (data && data.item && (data.item[list.labelField] || data.item.id)) || id;
+    : data && data.item && (data.item[list.labelField] || data.item.id);
 
   return (
     <PageContainer
@@ -272,7 +268,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
           label={
             loading
               ? 'Loading...'
-              : (data && data.item && (data.item[list.labelField] || data.item.id)) || id
+              : data && data.item && (data.item[list.labelField] || data.item.id)
           }
         />
       }
@@ -296,7 +292,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
                 />
               ) : (
                 <Notice tone="negative">
-                  The item with id "{id}" could not be found or you don't have access to it.
+                  The {list.label} could not be found or you don't have access to it.
                 </Notice>
               )}
             </Box>
@@ -305,7 +301,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
               <ItemForm
                 fieldModes={itemViewFieldModesByField}
                 selectedFields={selectedFields}
-                showDelete={list.kind !== 'singleton' && !data.keystone.adminMeta.list!.hideDelete}
+                showDelete={false}
                 listKey={listKey}
                 itemGetter={dataGetter.get('item') as DataGetter<ItemData>}
               />

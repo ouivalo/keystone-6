@@ -317,7 +317,6 @@ type Mutation {
   updateLinks(data: [LinkUpdateArgs!]!): [Link]
   deleteLink(where: LinkWhereUniqueInput!): Link
   deleteLinks(where: [LinkWhereUniqueInput!]!): [Link]
-  createPublisher(data: PublisherCreateInput!): Publisher
   updatePublisher(data: PublisherUpdateInput!): Publisher
 }
 
@@ -389,6 +388,7 @@ enum kind {
 type KeystoneAdminUIFieldMeta {
   path: String!
   label: String!
+  description: String
   isOrderable: Boolean!
   isFilterable: Boolean!
   fieldMeta: JSON
