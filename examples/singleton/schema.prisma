@@ -39,7 +39,7 @@ model Link {
 }
 
 model Publisher {
-  id              String  @id @default(cuid())
+  id              Int     @id @default(autoincrement())
   title           String  @default("Pelican Riot Home")
   copyrightText   String  @default("© 2022 Pelican Riot Home")
   contactEmail    String  @default("help@p-rh.com")

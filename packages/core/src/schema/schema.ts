@@ -28,7 +28,7 @@ export function singleton<
   Fields extends BaseFields<ListTypeInfo>,
   ListTypeInfo extends BaseStandardListTypeInfo
 >(config: Omit<SingletonConfig<ListTypeInfo, Fields>, 'kind'>): SingletonConfig<ListTypeInfo, any> {
-  return { ...config, kind: 'singleton' };
+  return { ...config, kind: 'singleton', db: { ...config.db, idField: { kind: 'autoincrement' } } };
 }
 
 export function gql(strings: TemplateStringsArray) {

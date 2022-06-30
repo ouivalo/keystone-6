@@ -4,7 +4,7 @@ import { FieldData, KeystoneConfig, getGqlNames } from '../types';
 import { createAdminMeta } from '../admin-ui/system/createAdminMeta';
 import { createGraphQLSchema } from './createGraphQLSchema';
 import { makeCreateContext } from './context/createContext';
-import { initialiseLists } from './core/types-for-lists';
+import { InitialisedList, initialiseLists } from './core/types-for-lists';
 import { setWriteLimit } from './core/utils';
 
 function getSudoGraphQLSchema(config: KeystoneConfig) {
@@ -102,6 +102,7 @@ export function createSystem(config: KeystoneConfig, isLiveReload?: boolean) {
           if (!isLiveReload) {
             await prismaClient.$connect();
             const context = createContext({ sudo: true });
+            await ensureSingletons(lists, prismaClient);
             await config.db.onConnect?.(context);
           }
         },
@@ -114,4 +115,22 @@ export function createSystem(config: KeystoneConfig, isLiveReload?: boolean) {
       };
     },
   };
+}
+
+async function ensureSingletons(lists: Record<string, InitialisedList>, prismaClient: any) {
+  for (const [, { listKey, ...rest }] of Object.entries(lists).filter(
+    ([, { kind }]) => kind === 'singleton'
+  )) {
+    const model = prismaClient[listKey[0].toLowerCase() + listKey.slice(1)];
+    let count = await model.count();
+
+    console.log(rest);
+
+    if (count === 0) {
+      let thing = await model.create({ data: { id: 1 } });
+      console.log(thing);
+    } else if (count !== 1) {
+      throw new Error(`Database error: Singleton list '${listKey}' contains more than 1 item`);
+    }
+  }
 }

@@ -211,7 +211,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
                 hideCreate
                 fields {
                   path
-                  itemView(id: "cl4xol6g50002d8irovdpfpya") {
+                  itemView(id: 1) {
                     fieldMode
                   }
                 }
@@ -305,38 +305,6 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
                 listKey={listKey}
                 itemGetter={dataGetter.get('item') as DataGetter<ItemData>}
               />
-              <StickySidebar>
-                <FieldLabel>Item ID</FieldLabel>
-                <div
-                  css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <TextInput
-                    css={{
-                      marginRight: spacing.medium,
-                      fontFamily: typography.fontFamily.monospace,
-                      fontSize: typography.fontSize.small,
-                    }}
-                    readOnly
-                    value={data.item.id}
-                  />
-                  <Tooltip content="Copy ID">
-                    {props => (
-                      <Button
-                        {...props}
-                        aria-label="Copy ID"
-                        onClick={() => {
-                          copyToClipboard(data.item.id);
-                        }}
-                      >
-                        <ClipboardIcon size="small" />
-                      </Button>
-                    )}
-                  </Tooltip>
-                </div>
-              </StickySidebar>
             </Fragment>
           )}
         </ColumnLayout>
