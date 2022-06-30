@@ -10,8 +10,6 @@ import { serializePathForImport } from '../utils/serializePathForImport';
 
 const walk = promisify(_walk);
 
-// TODO singletonPage for singletons
-
 function getDoesAdminConfigExist() {
   try {
     const configPath = Path.join(process.cwd(), 'admin', 'config');
