@@ -43,21 +43,21 @@ const auth = createAuth({
   },
 });
 
-const runner = setupTestRunner({
-  config: auth.withAuth(
-    apiTestConfig({
-      lists: {
-        User: list({
-          fields: {
-            name: text(),
-            email: text({ validation: { isRequired: true }, isIndexed: 'unique' }),
-            password: password(),
-          },
-        }),
+const config = apiTestConfig({
+  lists: {
+    User: list({
+      fields: {
+        name: text(),
+        email: text({ validation: { isRequired: true }, isIndexed: 'unique' }),
+        password: password(),
       },
-      session: statelessSessions({ secret: COOKIE_SECRET }),
-    })
-  ),
+    }),
+  },
+  session: statelessSessions({ secret: COOKIE_SECRET }),
+});
+
+const runner = setupTestRunner({
+  config: auth.withAuth(config) as typeof config,
 });
 
 async function authenticateWithPassword(

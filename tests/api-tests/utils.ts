@@ -1,22 +1,41 @@
 import { initConfig, createSystem } from '@keystone-6/core/system';
+import { list } from '@keystone-6/core';
+import { ListsConfig, BaseKeystoneTypeInfo } from '@keystone-6/core/types';
+import { setupTestRunner } from '@keystone-6/core/testing';
 import { getCommittedArtifacts } from '@keystone-6/core/artifacts';
 import { KeystoneConfig, KeystoneContext, DatabaseProvider } from '@keystone-6/core/types';
+import { text } from '@keystone-6/core/fields';
 
 export const dbProvider = process.env.TEST_ADAPTER as DatabaseProvider;
 
 // This function injects the db configuration that we use for testing in CI.
 // This functionality is a keystone repo specific way of doing things, so we don't
 // export it from `@keystone-6/core/testing`.
-export const apiTestConfig = (
-  config: Omit<KeystoneConfig, 'db'> & {
+export const apiTestConfig = <Lists extends ListsConfig>(
+  config: Omit<KeystoneConfig, 'db' | 'lists'> & {
     db?: Omit<KeystoneConfig['db'], 'provider' | 'url'>;
+    lists: Lists;
   }
-): KeystoneConfig => ({
+): KeystoneConfig<BaseKeystoneTypeInfo, Lists> => ({
   ...config,
   db: {
     ...config.db,
     provider: dbProvider,
     url: process.env.DATABASE_URL as string,
+  },
+});
+
+export type ContextFromRunner<Runner extends ReturnType<typeof setupTestRunner>> = Parameters<
+  Parameters<Runner>[0]
+>[0]['context'];
+
+apiTestConfig({
+  lists: {
+    Test: list({
+      fields: {
+        name: text(),
+      },
+    }),
   },
 });
 

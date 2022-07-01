@@ -118,19 +118,14 @@ export function createSystem(config: KeystoneConfig, isLiveReload?: boolean) {
 }
 
 async function ensureSingletons(lists: Record<string, InitialisedList>, prismaClient: any) {
-  for (const [, { listKey, ...rest }] of Object.entries(lists).filter(
+  for (const [, { listKey }] of Object.entries(lists).filter(
     ([, { kind }]) => kind === 'singleton'
   )) {
     const model = prismaClient[listKey[0].toLowerCase() + listKey.slice(1)];
-    let count = await model.count();
+    let item = await model.findFirst({ where: { id: 1 } });
 
-    console.log(rest);
-
-    if (count === 0) {
-      let thing = await model.create({ data: { id: 1 } });
-      console.log(thing);
-    } else if (count !== 1) {
-      throw new Error(`Database error: Singleton list '${listKey}' contains more than 1 item`);
+    if (!item) {
+      await model.create({ data: { id: 1 } });
     }
   }
 }

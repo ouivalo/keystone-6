@@ -5,7 +5,18 @@ import { Server } from 'http';
 import express from 'express';
 import supertest, { Test } from 'supertest';
 import memoizeOne from 'memoize-one';
-import type { KeystoneConfig, KeystoneContext } from './types';
+import type {
+  KeystoneConfig,
+  KeystoneContext,
+  BaseKeystoneTypeInfo,
+  ListsConfig,
+  ListConfig,
+  BaseSingletonTypeInfo,
+  BaseFields,
+  BaseStandardListTypeInfo,
+} from './types';
+import { SingletonConfig } from './types/config/lists';
+
 import {
   getCommittedArtifacts,
   writeCommittedArtifacts,
@@ -21,28 +32,46 @@ export type GraphQLRequest = (arg: {
   operationName?: string;
 }) => Test;
 
-export type TestArgs = {
-  context: KeystoneContext;
+export type TestArgs<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo> = {
+  context: KeystoneContext<TypeInfo>;
   graphQLRequest: GraphQLRequest;
   app: express.Express;
   server: Server;
 };
 
-export type TestEnv = {
+export type TestEnv<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo> = {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  testArgs: TestArgs;
+  testArgs: TestArgs<TypeInfo>;
 };
 
 const _hashPrismaSchema = memoizeOne(prismaSchema =>
   crypto.createHash('md5').update(prismaSchema).digest('hex')
 );
 const _alreadyGeneratedProjects = new Set<string>();
-export async function setupTestEnv({
+
+type Blah<Lists extends ListsConfig> = {
+  prisma: any;
+  lists: {
+    [Key in keyof Lists]: Blah2<Lists[Key]>;
+  };
+};
+
+type Blah2<
+  List extends
+    | SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
+    | ListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
+> = List extends SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
+  ? BaseSingletonTypeInfo
+  : List extends ListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
+  ? BaseStandardListTypeInfo
+  : never;
+
+export async function setupTestEnv<Lists extends ListsConfig>({
   config: _config,
 }: {
-  config: KeystoneConfig;
-}): Promise<TestEnv> {
+  config: KeystoneConfig<BaseKeystoneTypeInfo, Lists>;
+}): Promise<TestEnv<Blah<Lists>>> {
   // Force the UI to always be disabled.
   const config = initConfig({ ..._config, ui: { ..._config.ui, isDisabled: true } });
   const { graphQLSchema, getKeystone } = createSystem(config);
@@ -85,12 +114,16 @@ export async function setupTestEnv({
     disconnect: async () => {
       await Promise.all([disconnect(), apolloServer.stop()]);
     },
-    testArgs: { context: createContext(), graphQLRequest, app, server },
+    testArgs: { context: createContext() as any, graphQLRequest, app, server },
   };
 }
 
-export function setupTestRunner({ config }: { config: KeystoneConfig }) {
-  return (testFn: (testArgs: TestArgs) => Promise<void>) => async () => {
+export function setupTestRunner<Lists extends ListsConfig>({
+  config,
+}: {
+  config: KeystoneConfig<BaseKeystoneTypeInfo, Lists>;
+}) {
+  return (testFn: (testArgs: TestArgs<Blah<Lists>>) => Promise<void>) => async () => {
     // Reset the database to be empty for every test.
     const { connect, disconnect, testArgs } = await setupTestEnv({ config });
     await connect();

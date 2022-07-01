@@ -10,6 +10,9 @@ import type {
   CreateRequestContext,
   BaseKeystoneTypeInfo,
   KeystoneContext,
+  BaseListTypeInfo,
+  BaseSingletonTypeInfo,
+  BaseStandardListTypeInfo,
   DatabaseProvider,
 } from '..';
 
@@ -21,6 +24,7 @@ import type {
   MaybeSessionFunction,
   MaybeItemFunction,
   IdFieldConfig,
+  SingletonConfig,
 } from './lists';
 import type { BaseFields } from './fields';
 import type { StandardListAccessControl, FieldAccessControl } from './access-control';
@@ -84,8 +88,23 @@ export type StorageConfig = (
 ) &
   FileOrImage;
 
-export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo> = {
-  lists: ListOrSingletonSchemaConfig;
+type Blah<ListTypeInfo extends BaseListTypeInfo> = ListTypeInfo extends BaseStandardListTypeInfo
+  ? StandardListConfig<ListTypeInfo, BaseFields<ListTypeInfo>>
+  : ListTypeInfo extends BaseSingletonTypeInfo
+  ? SingletonConfig<ListTypeInfo, BaseFields<ListTypeInfo>>
+  : never;
+
+export type ListsConfig = Record<
+  string,
+  | StandardListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
+  | SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
+>;
+
+export type KeystoneConfig<
+  TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo,
+  Lists extends ListsConfig = ListsConfig
+> = {
+  lists: Lists;
   db: DatabaseConfig<TypeInfo>;
   ui?: AdminUIConfig<TypeInfo>;
   server?: ServerConfig<TypeInfo>;

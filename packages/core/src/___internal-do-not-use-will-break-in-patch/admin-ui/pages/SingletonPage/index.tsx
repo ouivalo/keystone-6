@@ -184,8 +184,6 @@ export const getSingletonPage = (props: ItemPageProps) => () => <ItemPage {...pr
 
 const ItemPage = ({ listKey }: ItemPageProps) => {
   const list = useList(listKey);
-  const { spacing, typography } = useTheme();
-
   const { query, selectedFields } = useMemo(() => {
     let selectedFields = Object.entries(list.fields)
       .filter(

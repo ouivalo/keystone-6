@@ -34,7 +34,7 @@ export type KeystoneContext<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystone
 // passed to List API functions (see `readonly Record<string, any>` below)
 
 export type KeystoneSingletonListsAPI<ListTypeInfo extends BaseSingletonTypeInfo> = {
-  read(): Promise<Record<string, any>>;
+  read(args: ResolveFields): Promise<Record<string, any>>;
   update(
     args: {
       readonly data: ListTypeInfo['inputs']['update'];
@@ -93,12 +93,15 @@ export type KeystoneStandardListsAPI<ListTypeInfo extends BaseStandardListTypeIn
   ): Promise<Record<string, any>[]>;
 };
 
-export type KeystoneListsAPI<KeystoneListsTypeInfo extends Record<string, BaseListTypeInfo>> = {
-  [Key in keyof KeystoneListsTypeInfo]: KeystoneListsTypeInfo[Key] extends BaseStandardListTypeInfo
-    ? KeystoneStandardListsAPI<KeystoneListsTypeInfo[Key]>
-    : KeystoneListsTypeInfo[Key] extends BaseSingletonTypeInfo
-    ? KeystoneSingletonListsAPI<KeystoneListsTypeInfo[Key]>
+type KeystoneListAPI<ListTypeInfo extends BaseListTypeInfo> =
+  ListTypeInfo extends BaseStandardListTypeInfo
+    ? KeystoneStandardListsAPI<ListTypeInfo>
+    : ListTypeInfo extends BaseSingletonTypeInfo
+    ? KeystoneSingletonListsAPI<ListTypeInfo>
     : never;
+
+export type KeystoneListsAPI<KeystoneListsTypeInfo extends Record<string, BaseListTypeInfo>> = {
+  [Key in keyof KeystoneListsTypeInfo]: KeystoneListAPI<KeystoneListsTypeInfo[Key]>;
 };
 
 type ResolveFields = {
@@ -150,12 +153,15 @@ type KeystoneSingletonListDbAPI<ListTypeInfo extends BaseSingletonTypeInfo> = {
   update(args: { readonly data: ListTypeInfo['inputs']['update'] }): Promise<ListTypeInfo['item']>;
 };
 
-export type KeystoneDbAPI<KeystoneListsTypeInfo extends Record<string, BaseListTypeInfo>> = {
-  [Key in keyof KeystoneListsTypeInfo]: KeystoneListsTypeInfo[Key] extends BaseStandardListTypeInfo
-    ? KeystoneStandardListDbAPI<KeystoneListsTypeInfo[Key]>
-    : KeystoneListsTypeInfo[Key] extends BaseSingletonTypeInfo
-    ? KeystoneSingletonListDbAPI<KeystoneListsTypeInfo[Key]>
+type KeystoneIndividualDbAPI<ListTypeInfo extends BaseListTypeInfo> =
+  ListTypeInfo extends BaseStandardListTypeInfo
+    ? KeystoneStandardListDbAPI<ListTypeInfo>
+    : ListTypeInfo extends BaseSingletonTypeInfo
+    ? KeystoneSingletonListDbAPI<ListTypeInfo>
     : never;
+
+export type KeystoneDbAPI<KeystoneListsTypeInfo extends Record<string, BaseListTypeInfo>> = {
+  [Key in keyof KeystoneListsTypeInfo]: KeystoneIndividualDbAPI<KeystoneListsTypeInfo[Key]>;
 };
 
 // GraphQL API

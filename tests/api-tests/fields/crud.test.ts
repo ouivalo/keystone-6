@@ -1,7 +1,7 @@
 import globby from 'globby';
 import { list } from '@keystone-6/core';
 import { text } from '@keystone-6/core/fields';
-import { KeystoneContext } from '@keystone-6/core/types';
+import { KeystoneConfig } from '@keystone-6/core/types';
 import { setupTestRunner } from '@keystone-6/core/testing';
 import { humanize } from '@keystone-6/core/src/lib/utils';
 import { apiTestConfig, expectSingleResolverError, expectValidationError } from '../utils';
@@ -21,6 +21,7 @@ testModules
       const listKey = 'Test';
       const runner = setupTestRunner({
         config: apiTestConfig({
+          ...(mod.getRootConfig?.(matrixValue) as Omit<KeystoneConfig, 'lists'>),
           lists: {
             [listKey]: list({
               fields: {
@@ -29,7 +30,6 @@ testModules
               },
             }),
           },
-          ...mod.getRootConfig?.(matrixValue),
         }),
       });
       const keystoneTestWrapper = (testFn: (args: any) => void = () => {}) =>
@@ -110,15 +110,18 @@ testModules
           const query = subfieldName
             ? `id name ${readFieldName || fieldName} { ${subfieldName} }`
             : `id name ${readFieldName || fieldName}`;
-
           const withHelpers = (
             wrappedFn: (args: {
-              context: KeystoneContext;
-              listKey: string;
+              context: Parameters<Parameters<typeof runner>[0]>[0]['context'];
+              listKey: typeof listKey;
               items: readonly Record<string, any>[];
             }) => void | Promise<void>
           ) => {
-            return async ({ context, listKey }: { context: KeystoneContext; listKey: string }) => {
+            return async ({
+              context,
+            }: {
+              context: Parameters<Parameters<typeof runner>[0]>[0]['context'];
+            }) => {
               const items = await context.query[listKey].findMany({
                 orderBy: { name: 'asc' },
                 query,
