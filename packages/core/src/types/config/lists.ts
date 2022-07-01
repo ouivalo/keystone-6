@@ -241,7 +241,7 @@ export type SingletonGraphQLConfig = {
   // including from the point of view of relationships to this list.
   //
   // Default: undefined
-  omit?: true | readonly ('query' | 'create' | 'update')[];
+  omit?: true | readonly ('query' | 'update')[];
 };
 
 export type ListGraphQLConfig = {

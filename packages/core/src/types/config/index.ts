@@ -10,7 +10,6 @@ import type {
   CreateRequestContext,
   BaseKeystoneTypeInfo,
   KeystoneContext,
-  BaseListTypeInfo,
   BaseSingletonTypeInfo,
   BaseStandardListTypeInfo,
   DatabaseProvider,

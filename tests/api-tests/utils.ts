@@ -29,6 +29,9 @@ export type ContextFromRunner<Runner extends ReturnType<typeof setupTestRunner>>
   Parameters<Runner>[0]
 >[0]['context'];
 
+export type ListKeyFromRunner<Runner extends ReturnType<typeof setupTestRunner>> =
+  keyof ContextFromRunner<Runner>['db'];
+
 apiTestConfig({
   lists: {
     Test: list({
