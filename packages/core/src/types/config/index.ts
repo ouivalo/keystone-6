@@ -88,12 +88,6 @@ export type StorageConfig = (
 ) &
   FileOrImage;
 
-type Blah<ListTypeInfo extends BaseListTypeInfo> = ListTypeInfo extends BaseStandardListTypeInfo
-  ? StandardListConfig<ListTypeInfo, BaseFields<ListTypeInfo>>
-  : ListTypeInfo extends BaseSingletonTypeInfo
-  ? SingletonConfig<ListTypeInfo, BaseFields<ListTypeInfo>>
-  : never;
-
 export type ListsConfig = Record<
   string,
   | StandardListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>

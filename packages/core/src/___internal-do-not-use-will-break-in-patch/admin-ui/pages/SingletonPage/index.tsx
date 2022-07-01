@@ -1,7 +1,6 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
 
-import copyToClipboard from 'clipboard-copy';
 import {
   Fragment,
   HTMLAttributes,
@@ -17,12 +16,9 @@ import {
 import { Button } from '@keystone-ui/button';
 import { Box, Center, Stack, Text, jsx, useTheme } from '@keystone-ui/core';
 import { LoadingDots } from '@keystone-ui/loading';
-import { ClipboardIcon } from '@keystone-ui/icons/icons/ClipboardIcon';
 import { AlertDialog } from '@keystone-ui/modals';
 import { Notice } from '@keystone-ui/notice';
 import { useToasts } from '@keystone-ui/toast';
-import { Tooltip } from '@keystone-ui/tooltip';
-import { FieldLabel, TextInput } from '@keystone-ui/fields';
 import {
   DataGetter,
   DeepNullable,
