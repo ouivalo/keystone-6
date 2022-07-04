@@ -1,12 +1,42 @@
 import { initConfig, createSystem } from '@keystone-6/core/system';
 import { list } from '@keystone-6/core';
-import { ListsConfig, BaseKeystoneTypeInfo } from '@keystone-6/core/types';
+import {
+  ListsConfig,
+  SingletonConfig,
+  BaseSingletonTypeInfo,
+  ListConfig,
+  BaseStandardListTypeInfo,
+} from '@keystone-6/core/types';
 import { setupTestRunner } from '@keystone-6/core/testing';
 import { getCommittedArtifacts } from '@keystone-6/core/artifacts';
 import { KeystoneConfig, KeystoneContext, DatabaseProvider } from '@keystone-6/core/types';
 import { text } from '@keystone-6/core/fields';
 
 export const dbProvider = process.env.TEST_ADAPTER as DatabaseProvider;
+
+type Blah<Lists extends ListsConfig> = {
+  prisma: any;
+  lists: {
+    [Key in keyof Lists]: Blah2<Lists[Key]>;
+  };
+};
+
+type GeneralSingletonConfig = SingletonConfig<any, any>;
+
+type GeneralStandardListConfig = ListConfig<any, any>;
+
+type Blah2<List extends GeneralSingletonConfig | GeneralStandardListConfig> =
+  List extends GeneralSingletonConfig
+    ? BaseSingletonTypeInfo
+    : List extends GeneralStandardListConfig
+    ? BaseStandardListTypeInfo
+    : never;
+
+export type TypeInfoFromConfig<Config extends KeystoneConfig<any>> = Config extends KeystoneConfig<
+  infer TypeInfo
+>
+  ? TypeInfo
+  : never;
 
 // This function injects the db configuration that we use for testing in CI.
 // This functionality is a keystone repo specific way of doing things, so we don't
@@ -16,14 +46,17 @@ export const apiTestConfig = <Lists extends ListsConfig>(
     db?: Omit<KeystoneConfig['db'], 'provider' | 'url'>;
     lists: Lists;
   }
-): KeystoneConfig<BaseKeystoneTypeInfo, Lists> => ({
-  ...config,
-  db: {
-    ...config.db,
-    provider: dbProvider,
-    url: process.env.DATABASE_URL as string,
-  },
-});
+): KeystoneConfig<Blah<Lists>> => {
+  const configWithDb: KeystoneConfig = {
+    ...config,
+    db: {
+      ...config.db,
+      provider: dbProvider,
+      url: process.env.DATABASE_URL as string,
+    },
+  };
+  return configWithDb as any;
+};
 
 export type ContextFromRunner<Runner extends ReturnType<typeof setupTestRunner>> = Parameters<
   Parameters<Runner>[0]
@@ -120,7 +153,7 @@ export const expectExtensionError = (
   const unpackedErrors = unpackErrors(errors);
   expect(unpackedErrors).toEqual(
     args.map(({ path, messages, debug }) => {
-      const message = `An error occured while running "${extensionName}".\n${j(messages)}`;
+      const message: string = `An error occured while running "${extensionName}".\n${j(messages)}`;
       const stacktrace = message.split('\n');
       stacktrace[0] = `Error: ${stacktrace[0]}`;
 
@@ -276,21 +309,24 @@ export const expectSingleRelationshipError = (
     },
   ]);
 
-export async function seed<T extends Record<keyof T, Record<string, unknown>[]>>(
-  context: KeystoneContext,
-  initialData: T
+export type TypeInfoForOnlyStandardLists = Blah<Record<string, GeneralStandardListConfig>>;
+
+export async function seed<TypeInfo extends TypeInfoForOnlyStandardLists>(
+  context: KeystoneContext<TypeInfo>,
+  initialData: { [Key in keyof TypeInfo['lists']]?: Record<string, unknown>[] }
 ) {
   const results: any = {};
-  for (const listKey of Object.keys(initialData)) {
-    results[listKey as keyof T] = await context.sudo().query[listKey].createMany({
-      data: initialData[listKey as keyof T],
-    });
+  for (const [listKey, data] of Object.entries(initialData) as [
+    keyof typeof initialData,
+    Record<string, unknown>[]
+  ][]) {
+    results[listKey] = await context.sudo().query[listKey].createMany({ data });
   }
 
-  return results as Record<keyof T, Record<string, unknown>[]>;
+  return results as Record<keyof typeof initialData, Record<string, unknown>[]>;
 }
 
-export const getPrismaSchema = async (_config: KeystoneConfig) => {
+export const getPrismaSchema = async (_config: KeystoneConfig<any>) => {
   const config = initConfig(_config);
   const { graphQLSchema } = createSystem(config);
 

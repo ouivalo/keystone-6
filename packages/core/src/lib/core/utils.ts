@@ -3,7 +3,7 @@ import pluralize from 'pluralize';
 import { BaseItem, KeystoneConfig, KeystoneContext } from '../../types';
 import { humanize } from '../utils';
 import { prismaError } from './graphql-errors';
-import { InitialisedList } from './types-for-lists';
+import { InitialisedList, InitialisedStandardList } from './types-for-lists';
 import { PrismaFilter, UniquePrismaFilter } from './where-inputs';
 
 declare const prisma: unique symbol;
@@ -177,3 +177,10 @@ export const getWriteLimit = (context: KeystoneContext) => {
   }
   return limit;
 };
+
+export function throwIfNotStandardList(list: InitialisedList): InitialisedStandardList {
+  if (list.kind !== 'list') {
+    throw new Error(`${list.listKey} is not a standard list`);
+  }
+  return list;
+}

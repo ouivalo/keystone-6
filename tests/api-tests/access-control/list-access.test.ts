@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { KeystoneContext } from '@keystone-6/core/types';
 import { setupTestEnv, TestEnv } from '@keystone-6/core/testing';
-import { expectAccessDenied } from '../utils';
+import { expectAccessDenied, TypeInfoForOnlyStandardLists } from '../utils';
 import {
   nameFn,
   listAccessVariations,
@@ -37,7 +37,8 @@ const expectNoAccessMany = <N extends string>(
 type IdType = any;
 
 describe(`List access`, () => {
-  let testEnv: TestEnv, context: KeystoneContext;
+  let testEnv: TestEnv<TypeInfoForOnlyStandardLists>,
+    context: KeystoneContext<TypeInfoForOnlyStandardLists>;
   let items: Record<string, { id: IdType; name: string }[]>;
   beforeAll(async () => {
     testEnv = await setupTestEnv({ config });

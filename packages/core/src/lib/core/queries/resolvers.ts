@@ -10,8 +10,8 @@ import {
   InputFilter,
 } from '../where-inputs';
 import { limitsExceededError, userInputError } from '../graphql-errors';
-import { InitialisedStandardList, InitialisedList, InitialisedSingleton } from '../types-for-lists';
-import { getDBFieldKeyForFieldOnMultiField, runWithPrisma } from '../utils';
+import { InitialisedStandardList, InitialisedSingleton } from '../types-for-lists';
+import { getDBFieldKeyForFieldOnMultiField, runWithPrisma, throwIfNotStandardList } from '../utils';
 import { checkFilterOrderAccess } from '../filter-order-access';
 
 // we want to put the value we get back from the field's unique where resolver into an equals
@@ -25,7 +25,7 @@ export function mapUniqueWhereToWhere(uniqueWhere: UniquePrismaFilter): PrismaFi
 }
 
 function traverseQuery(
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   inputFilter: InputFilter,
   filterFields: Record<string, { fieldKey: string; list: InitialisedStandardList }>
@@ -45,7 +45,12 @@ function traverseQuery(
       const field = list.fields[fieldKey];
       if (field.dbField.kind === 'relation' && value !== null) {
         const foreignList = field.dbField.list;
-        traverseQuery(list.lists[foreignList], context, value, filterFields);
+        traverseQuery(
+          throwIfNotStandardList(list.lists[foreignList]),
+          context,
+          value,
+          filterFields
+        );
       }
     }
   });
@@ -63,7 +68,7 @@ export async function checkFilterAccess(
 }
 
 export async function accessControlledFilter(
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   resolvedWhere: PrismaFilter,
   accessFilters: boolean | InputFilter
@@ -113,20 +118,9 @@ export async function findSingleton(list: InitialisedSingleton, context: Keyston
     return null;
   }
 
-  const accessFilters = await getAccessFilters(list, context, 'query');
-  if (accessFilters === false) {
-    return null;
-  }
+  // TODO add item access control
 
-  // Check filter access
-  // const fieldKey = Object.keys(args.where)[0];
-  // TODO - make 'filter' not be available on singleton lists
-  // await checkFilterOrderAccess([{ fieldKey, list }], context, 'filter');
-
-  // Apply access control
-  const filter = await accessControlledFilter(list, context, {}, accessFilters);
-
-  return runWithPrisma(context, list, model => model.findFirst({ where: filter }));
+  return runWithPrisma(context, list, model => model.findUnique({ where: { id: 1 } }));
 }
 
 export async function findMany(

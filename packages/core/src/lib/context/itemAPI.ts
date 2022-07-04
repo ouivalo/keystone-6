@@ -5,6 +5,7 @@ import {
   KeystoneListsAPI,
   KeystoneContext,
   GqlNames,
+  BaseListTypeInfo,
 } from '../../types';
 import { executeGraphQLFieldToRootVal } from './executeGraphQLFieldToRootVal';
 import { executeGraphQLFieldWithSelection } from './executeGraphQLFieldWithSelection';
@@ -18,7 +19,7 @@ const objectEntriesButUsingKeyof: <T extends Record<string, any>>(
 export function getDbAPIFactory(
   gqlNames: GqlNames,
   schema: GraphQLSchema
-): (context: KeystoneContext) => KeystoneDbAPI<Record<string, BaseStandardListTypeInfo>>[string] {
+): (context: KeystoneContext) => KeystoneDbAPI<Record<string, BaseListTypeInfo>>[string] {
   const f = (operation: 'query' | 'mutation', fieldName: string) => {
     const rootType = operation === 'mutation' ? schema.getMutationType()! : schema.getQueryType()!;
     const field = rootType.getFields()[fieldName];
@@ -32,6 +33,12 @@ export function getDbAPIFactory(
     }
     return executeGraphQLFieldToRootVal(field);
   };
+
+  const singletonApi = {
+    read: f('query', gqlNames.itemQueryName),
+    update: f('mutation', gqlNames.updateMutationName),
+  };
+
   const api = {
     findOne: f('query', gqlNames.itemQueryName),
     findMany: f('query', gqlNames.listQueryName),
@@ -64,6 +71,7 @@ export function itemAPIForList(
     };
   };
   const gqlNames = context.gqlNames(listKey);
+
   return {
     findOne: f('query', gqlNames.itemQueryName),
     findMany: f('query', gqlNames.listQueryName),

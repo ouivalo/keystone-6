@@ -13,8 +13,13 @@ import {
 import { graphql } from '../../..';
 import { getOperationAccess, getAccessFilters } from '../access-control';
 import { ResolvedDBField, ResolvedRelationDBField } from '../resolve-relationships';
-import { InitialisedList } from '../types-for-lists';
-import { IdType, getDBFieldKeyForFieldOnMultiField, runWithPrisma } from '../utils';
+import { InitialisedList, InitialisedStandardList } from '../types-for-lists';
+import {
+  IdType,
+  getDBFieldKeyForFieldOnMultiField,
+  runWithPrisma,
+  throwIfNotStandardList,
+} from '../utils';
 import { accessReturnError, extensionError } from '../graphql-errors';
 import { accessControlledFilter } from './resolvers';
 import * as queries from './resolvers';
@@ -22,7 +27,7 @@ import * as queries from './resolvers';
 function getRelationVal(
   dbField: ResolvedRelationDBField,
   id: IdType,
-  foreignList: InitialisedList,
+  foreignList: InitialisedStandardList,
   context: KeystoneContext,
   info: GraphQLResolveInfo,
   fk?: IdType
@@ -116,7 +121,14 @@ function getValueForDBField(
     if (dbField.mode === 'one' && dbField.foreignIdField.kind !== 'none') {
       fk = rootVal[`${fieldPath}Id`] as IdType;
     }
-    return getRelationVal(dbField, id, lists[dbField.list], context, info, fk);
+    return getRelationVal(
+      dbField,
+      id,
+      throwIfNotStandardList(lists[dbField.list]),
+      context,
+      info,
+      fk
+    );
   } else {
     return rootVal[fieldPath] as any;
   }

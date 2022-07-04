@@ -112,6 +112,7 @@ type ResolveFields = {
 };
 
 type KeystoneStandardListDbAPI<ListTypeInfo extends BaseStandardListTypeInfo> = {
+  kind: 'list';
   findMany(args?: {
     readonly where?: ListTypeInfo['inputs']['where'];
     readonly take?: number;
@@ -149,6 +150,7 @@ type KeystoneStandardListDbAPI<ListTypeInfo extends BaseStandardListTypeInfo> = 
 };
 
 type KeystoneSingletonListDbAPI<ListTypeInfo extends BaseSingletonTypeInfo> = {
+  kind: 'singleton';
   read(): Promise<ListTypeInfo['item']>;
   update(args: { readonly data: ListTypeInfo['inputs']['update'] }): Promise<ListTypeInfo['item']>;
 };

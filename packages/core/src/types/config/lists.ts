@@ -39,9 +39,15 @@ export type SingletonConfig<
 
 export type StandardListConfig<
   ListTypeInfo extends BaseStandardListTypeInfo,
-  Fields extends BaseFields<ListTypeInfo>
+  Fields extends BaseFields<BaseStandardListTypeInfo>
 > = {
   kind: 'list';
+} & StandardListConfigWithoutKind<ListTypeInfo, Fields>;
+
+export type StandardListConfigWithoutKind<
+  ListTypeInfo extends BaseStandardListTypeInfo,
+  Fields extends BaseFields<BaseStandardListTypeInfo>
+> = {
   /*
       A note on defaults: several options default based on the listKey, including label, path,
       singular, plural, itemQueryName and listQueryName. All these options default independently, so
@@ -88,13 +94,13 @@ export type StandardListAdminUIConfig<
    * The field to use as a label in the Admin UI. If you want to base the label off more than a single field, use a virtual field and reference that field here.
    * @default 'label', if it exists, falling back to 'name', then 'title', and finally 'id', which is guaranteed to exist.
    */
-  labelField?: 'id' | keyof Fields;
+  labelField?: 'id' | (keyof Fields & string);
   /**
    * The fields used by the Admin UI when searching this list.
    * It is always possible to search by id and `id` should not be specified in this option.
    * @default The `labelField` if it has a string `contains` filter, otherwise none.
    */
-  searchFields?: readonly Extract<keyof Fields, string>[];
+  searchFields?: readonly (keyof Fields & string)[];
 
   /**
    * Hides the create button in the Admin UI.
@@ -135,9 +141,9 @@ export type StandardListAdminUIConfig<
      * Users of the Admin UI can select different columns to show in the UI.
      * @default the first three fields in the list
      */
-    initialColumns?: readonly ('id' | keyof Fields)[];
+    initialColumns?: readonly ('id' | (keyof Fields & string))[];
     // was previously top-level defaultSort
-    initialSort?: { field: 'id' | keyof Fields; direction: 'ASC' | 'DESC' };
+    initialSort?: { field: 'id' | (keyof Fields & string); direction: 'ASC' | 'DESC' };
     // was previously defaultPageSize
     pageSize?: number; // default number of items to display per page on the list screen
     // note: we are removing maximumPageSize

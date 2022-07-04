@@ -137,7 +137,7 @@ export type SingletonListAccessControl<ListTypeInfo extends BaseSingletonTypeInf
   // These rules are applied to each item being operated on individually. They return `true` or `false`,
   // and if false, an access denied error will be returned for the individual operation.
   item?: {
-    read: ReadItemAccessArgs<ListTypeInfo>;
+    read?: ReadItemAccessArgs<ListTypeInfo>;
     update?: UpdateListItemAccessControl<ListTypeInfo>;
   };
 };

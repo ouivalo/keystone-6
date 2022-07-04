@@ -5,17 +5,7 @@ import { Server } from 'http';
 import express from 'express';
 import supertest, { Test } from 'supertest';
 import memoizeOne from 'memoize-one';
-import type {
-  KeystoneConfig,
-  KeystoneContext,
-  BaseKeystoneTypeInfo,
-  ListsConfig,
-  ListConfig,
-  BaseSingletonTypeInfo,
-  BaseFields,
-  BaseStandardListTypeInfo,
-} from './types';
-import { SingletonConfig } from './types/config/lists';
+import type { KeystoneConfig, KeystoneContext, BaseKeystoneTypeInfo } from './types';
 
 import {
   getCommittedArtifacts,
@@ -50,28 +40,11 @@ const _hashPrismaSchema = memoizeOne(prismaSchema =>
 );
 const _alreadyGeneratedProjects = new Set<string>();
 
-type Blah<Lists extends ListsConfig> = {
-  prisma: any;
-  lists: {
-    [Key in keyof Lists]: Blah2<Lists[Key]>;
-  };
-};
-
-type Blah2<
-  List extends
-    | SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
-    | ListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
-> = List extends SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
-  ? BaseSingletonTypeInfo
-  : List extends ListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
-  ? BaseStandardListTypeInfo
-  : never;
-
-export async function setupTestEnv<Lists extends ListsConfig>({
+export async function setupTestEnv<KeystoneTypeInfo extends BaseKeystoneTypeInfo>({
   config: _config,
 }: {
-  config: KeystoneConfig<BaseKeystoneTypeInfo, Lists>;
-}): Promise<TestEnv<Blah<Lists>>> {
+  config: KeystoneConfig<KeystoneTypeInfo>;
+}): Promise<TestEnv<KeystoneTypeInfo>> {
   // Force the UI to always be disabled.
   const config = initConfig({ ..._config, ui: { ..._config.ui, isDisabled: true } });
   const { graphQLSchema, getKeystone } = createSystem(config);
@@ -118,12 +91,12 @@ export async function setupTestEnv<Lists extends ListsConfig>({
   };
 }
 
-export function setupTestRunner<Lists extends ListsConfig>({
+export function setupTestRunner<TypeInfo extends BaseKeystoneTypeInfo>({
   config,
 }: {
-  config: KeystoneConfig<BaseKeystoneTypeInfo, Lists>;
+  config: KeystoneConfig<TypeInfo>;
 }) {
-  return (testFn: (testArgs: TestArgs<Blah<Lists>>) => Promise<void>) => async () => {
+  return (testFn: (testArgs: TestArgs<TypeInfo>) => Promise<void>) => async () => {
     // Reset the database to be empty for every test.
     const { connect, disconnect, testArgs } = await setupTestEnv({ config });
     await connect();

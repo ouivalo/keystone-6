@@ -10,8 +10,6 @@ import type {
   CreateRequestContext,
   BaseKeystoneTypeInfo,
   KeystoneContext,
-  BaseSingletonTypeInfo,
-  BaseStandardListTypeInfo,
   DatabaseProvider,
 } from '..';
 
@@ -87,17 +85,10 @@ export type StorageConfig = (
 ) &
   FileOrImage;
 
-export type ListsConfig = Record<
-  string,
-  | StandardListConfig<BaseStandardListTypeInfo, BaseFields<BaseStandardListTypeInfo>>
-  | SingletonConfig<BaseSingletonTypeInfo, BaseFields<BaseSingletonTypeInfo>>
->;
+export type ListsConfig = Record<string, StandardListConfig<any, any> | SingletonConfig<any, any>>;
 
-export type KeystoneConfig<
-  TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo,
-  Lists extends ListsConfig = ListsConfig
-> = {
-  lists: Lists;
+export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneTypeInfo> = {
+  lists: ListsConfig;
   db: DatabaseConfig<TypeInfo>;
   ui?: AdminUIConfig<TypeInfo>;
   server?: ServerConfig<TypeInfo>;
@@ -135,6 +126,7 @@ export type {
   BaseFields,
   MaybeSessionFunction,
   MaybeItemFunction,
+  SingletonConfig,
 };
 
 // config.db

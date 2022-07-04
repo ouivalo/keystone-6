@@ -1,6 +1,7 @@
 import { text, password } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
 import { statelessSessions } from '@keystone-6/core/session';
+import { KeystoneConfig } from '@keystone-6/core/types';
 import { createAuth } from '@keystone-6/auth';
 import { setupTestRunner, TestArgs } from '@keystone-6/core/testing';
 import { apiTestConfig, expectInternalServerError, expectValidationError, seed } from './utils';
@@ -57,7 +58,7 @@ const config = apiTestConfig({
 });
 
 const runner = setupTestRunner({
-  config: auth.withAuth(config) as typeof config,
+  config: auth.withAuth(config as KeystoneConfig) as typeof config,
 });
 
 async function authenticateWithPassword(
