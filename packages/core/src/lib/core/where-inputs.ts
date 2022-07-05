@@ -1,7 +1,7 @@
 import { DBField, KeystoneContext } from '../../types';
 import { userInputError } from './graphql-errors';
 import { InitialisedStandardList } from './types-for-lists';
-import { getDBFieldKeyForFieldOnMultiField } from './utils';
+import { getDBFieldKeyForFieldOnMultiField, throwIfNotStandardList } from './utils';
 
 export type InputFilter = Record<string, any> & {
   _____?: 'input filter';
@@ -76,7 +76,7 @@ export async function resolveWhereInput(
                 }
                 const foreignList = field.dbField.list;
                 const whereResolver = (val: any) =>
-                  resolveWhereInput(val, list.lists[foreignList], context);
+                  resolveWhereInput(val, throwIfNotStandardList(list.lists[foreignList]), context);
                 if (field.dbField.mode === 'many') {
                   return async () => {
                     if (value === null) {

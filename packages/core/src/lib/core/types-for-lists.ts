@@ -159,7 +159,7 @@ function getListsWithInitialisedFields(
               listKey,
               lists: listGraphqlTypes,
               provider,
-              getStorage: storage => configStorage?.[storage],
+              getStorage: (storage: string) => configStorage?.[storage],
             });
 
             const omit = f.graphql?.omit;

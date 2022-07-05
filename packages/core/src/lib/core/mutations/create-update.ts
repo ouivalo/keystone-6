@@ -7,6 +7,7 @@ import {
   IdType,
   runWithPrisma,
   getWriteLimit,
+  throwIfNotStandardList,
 } from '../utils';
 import { InputFilter, resolveUniqueWhereInput, UniqueInputFilter } from '../where-inputs';
 import {
@@ -117,13 +118,17 @@ export async function createMany(
   });
 }
 
-async function updateSingleton(
+export async function updateSingleton(
   updateInput: { data: Record<string, any> },
   list: InitialisedSingleton,
-  context: KeystoneContext,
-  accessFilters: boolean | InputFilter,
-  operationAccess: boolean
+  context: KeystoneContext
 ) {
+  // Check operation permission to pass into single operation
+  const operationAccess = await getOperationAccess(list, context, 'update');
+
+  // Get list-level access control filters
+  const accessFilters = await getAccessFilters(list, context, 'update');
+
   // Operation level access control
   if (!operationAccess) {
     throw accessDeniedError(
@@ -134,13 +139,7 @@ async function updateSingleton(
   const { data: rawData } = updateInput;
 
   // Filter and Item access control. Will throw an accessDeniedError if not allowed.
-  const item = await getAccessControlledItemForUpdate(
-    list,
-    context,
-    undefined,
-    accessFilters,
-    rawData
-  );
+  const item = await getAccessControlledItemForUpdate(list, context, {}, accessFilters, rawData);
 
   const { afterOperation, data } = await resolveInputForCreateOrUpdate(
     list,
@@ -152,7 +151,7 @@ async function updateSingleton(
   const writeLimit = getWriteLimit(context);
 
   const updatedItem = await writeLimit(() =>
-    runWithPrisma(context, list, model => model.update({ where: { id: item.id }, data }))
+    runWithPrisma(context, list, model => model.update({ where: { id: 1 }, data }))
   );
 
   await afterOperation(updatedItem);
@@ -211,7 +210,7 @@ async function updateSingle(
 
 export async function updateOne(
   updateInput: { where: UniqueInputFilter; data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext
 ) {
   // Check operation permission to pass into single operation
@@ -298,7 +297,8 @@ async function getResolvedData(
                   // No-op: Should this be UserInputError?
                   return () => undefined;
                 }
-                const foreignList = list.lists[field.dbField.list];
+                const foreignList = throwIfNotStandardList(list.lists[field.dbField.list]);
+
                 let resolver;
                 if (field.dbField.mode === 'many') {
                   if (operation === 'create') {

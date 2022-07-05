@@ -41,12 +41,12 @@ export function makeCreateContext({
 
   const publicDbApiFactories: Record<string, ReturnType<typeof getDbAPIFactory>> = {};
   for (const [listKey, gqlNames] of Object.entries(gqlNamesByList)) {
-    publicDbApiFactories[listKey] = getDbAPIFactory(gqlNames, graphQLSchema);
+    publicDbApiFactories[listKey] = getDbAPIFactory(gqlNames, graphQLSchema, lists[listKey].kind);
   }
 
   const sudoDbApiFactories: Record<string, ReturnType<typeof getDbAPIFactory>> = {};
   for (const [listKey, gqlNames] of Object.entries(gqlNamesByList)) {
-    sudoDbApiFactories[listKey] = getDbAPIFactory(gqlNames, sudoGraphQLSchema);
+    sudoDbApiFactories[listKey] = getDbAPIFactory(gqlNames, sudoGraphQLSchema, lists[listKey].kind);
   }
 
   const createContext = ({
@@ -104,7 +104,9 @@ export function makeCreateContext({
 
     const dbAPIFactories = sudo ? sudoDbApiFactories : publicDbApiFactories;
     for (const listKey of Object.keys(gqlNamesByList)) {
-      dbAPI[listKey] = dbAPIFactories[listKey](contextToReturn);
+      const kind = lists[listKey].kind;
+
+      dbAPI[listKey] = dbAPIFactories[listKey](contextToReturn, kind);
       itemAPI[listKey] = itemAPIForList(listKey, contextToReturn);
     }
     return contextToReturn;

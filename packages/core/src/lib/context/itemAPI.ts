@@ -18,7 +18,8 @@ const objectEntriesButUsingKeyof: <T extends Record<string, any>>(
 
 export function getDbAPIFactory(
   gqlNames: GqlNames,
-  schema: GraphQLSchema
+  schema: GraphQLSchema,
+  kind: 'list' | 'singleton'
 ): (context: KeystoneContext) => KeystoneDbAPI<Record<string, BaseListTypeInfo>>[string] {
   const f = (operation: 'query' | 'mutation', fieldName: string) => {
     const rootType = operation === 'mutation' ? schema.getMutationType()! : schema.getQueryType()!;
@@ -39,6 +40,20 @@ export function getDbAPIFactory(
     update: f('mutation', gqlNames.updateMutationName),
   };
 
+  if (kind === 'singleton') {
+    return (context: KeystoneContext) => {
+      return {
+        ...(Object.fromEntries(
+          objectEntriesButUsingKeyof(singletonApi).map(([key, impl]) => [
+            key,
+            (args: Record<string, any>) => impl(args, context),
+          ])
+        ) as Record<keyof typeof singletonApi, any>),
+        kind: 'singleton',
+      };
+    };
+  }
+
   const api = {
     findOne: f('query', gqlNames.itemQueryName),
     findMany: f('query', gqlNames.listQueryName),
@@ -50,13 +65,18 @@ export function getDbAPIFactory(
     deleteOne: f('mutation', gqlNames.deleteMutationName),
     deleteMany: f('mutation', gqlNames.deleteManyMutationName),
   };
-  return (context: KeystoneContext) =>
-    Object.fromEntries(
-      objectEntriesButUsingKeyof(api).map(([key, impl]) => [
-        key,
-        (args: Record<string, any>) => impl(args, context),
-      ])
-    ) as Record<keyof typeof api, any>;
+
+  return (context: KeystoneContext) => {
+    return {
+      ...(Object.fromEntries(
+        objectEntriesButUsingKeyof(api).map(([key, impl]) => [
+          key,
+          (args: Record<string, any>) => impl(args, context),
+        ])
+      ) as Record<keyof typeof api, any>),
+      kind: 'list',
+    };
+  };
 }
 
 export function itemAPIForList(
