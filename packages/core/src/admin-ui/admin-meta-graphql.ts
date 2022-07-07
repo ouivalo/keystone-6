@@ -82,7 +82,7 @@ export type StaticAdminMetaQuery = {
               path: string;
               label: string;
               description: string | null;
-              fieldMeta: any | null;
+              fieldMeta: JSONValue | null;
               viewsIndex: number;
               customViewsIndex: number | null;
               search: QueryMode | null;
@@ -114,7 +114,7 @@ export type StaticAdminMetaQuery = {
               path: string;
               label: string;
               description: string | null;
-              fieldMeta: any | null;
+              fieldMeta: JSONValue | null;
               viewsIndex: number;
               customViewsIndex: number | null;
               search: QueryMode | null;
