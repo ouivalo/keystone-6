@@ -381,18 +381,3 @@ function ResetChangesButton(props: { onReset: () => void }) {
     </Fragment>
   );
 }
-
-const StickySidebar = (props: HTMLAttributes<HTMLDivElement>) => {
-  const { spacing } = useTheme();
-  return (
-    <div
-      css={{
-        marginTop: spacing.xlarge,
-        marginBottom: spacing.xxlarge,
-        position: 'sticky',
-        top: spacing.xlarge,
-      }}
-      {...props}
-    />
-  );
-};

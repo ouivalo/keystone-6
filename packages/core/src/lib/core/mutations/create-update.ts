@@ -33,7 +33,7 @@ import { validateUpdateCreate } from './validation';
 
 async function createSingle(
   { data: rawData }: { data: Record<string, any> },
-  list: InitialisedList,
+  list: InitialisedStandardList,
   context: KeystoneContext,
   operationAccess: boolean
 ) {

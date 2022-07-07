@@ -20,26 +20,24 @@ function promisesButSettledWhenAllSettledAndInOrder<T extends Promise<unknown>[]
   }) as T;
 }
 
-function getMutationsForSingletonList(list: InitialisedSingleton) {
+export function getMutationsForSingletonList(list: InitialisedSingleton) {
   const names = getGqlNames(list);
-  if (list.kind === 'singleton') {
-    return {
-      mutations: {
-        ...(list.graphql.isEnabled.update && {
-          [names.updateMutationName]: graphql.field({
-            type: list.types.output,
-            args: { data: graphql.arg({ type: graphql.nonNull(list.types.update) }) },
-            resolve(_rootVal, { data }, context) {
-              return createAndUpdate.updateSingleton({ data }, list, context);
-            },
-          }),
+  return {
+    mutations: {
+      ...(list.graphql.isEnabled.update && {
+        [names.updateMutationName]: graphql.field({
+          type: list.types.output,
+          args: { data: graphql.arg({ type: graphql.nonNull(list.types.update) }) },
+          resolve(_rootVal, { data }, context) {
+            return createAndUpdate.updateSingleton({ data }, list, context);
+          },
         }),
-      },
-    };
-  }
+      }),
+    },
+  };
 }
 
-function getMutationsForStandardList(list: InitialisedStandardList) {
+export function getMutationsForStandardList(list: InitialisedStandardList) {
   const names = getGqlNames(list);
 
   const updateOne = graphql.field({

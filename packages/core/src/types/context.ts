@@ -111,7 +111,7 @@ type ResolveFields = {
   readonly query?: string;
 };
 
-type KeystoneStandardListDbAPI<ListTypeInfo extends BaseStandardListTypeInfo> = {
+export type KeystoneStandardListDbAPI<ListTypeInfo extends BaseStandardListTypeInfo> = {
   kind: 'list';
   findMany(args?: {
     readonly where?: ListTypeInfo['inputs']['where'];
@@ -155,7 +155,7 @@ type KeystoneSingletonListDbAPI<ListTypeInfo extends BaseSingletonTypeInfo> = {
   update(args: { readonly data: ListTypeInfo['inputs']['update'] }): Promise<ListTypeInfo['item']>;
 };
 
-type KeystoneIndividualDbAPI<ListTypeInfo extends BaseListTypeInfo> =
+export type KeystoneIndividualDbAPI<ListTypeInfo extends BaseListTypeInfo> =
   ListTypeInfo extends BaseStandardListTypeInfo
     ? KeystoneStandardListDbAPI<ListTypeInfo>
     : ListTypeInfo extends BaseSingletonTypeInfo

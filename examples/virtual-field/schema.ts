@@ -79,7 +79,7 @@ export const lists: Lists = {
       authorName: virtual({
         field: graphql.field({
           type: graphql.String,
-          async resolve(item, args, context) {
+          async resolve(item, args, context: Post) {
             const { author } = await context.query.Post.findOne({
               where: { id: item.id.toString() },
               query: 'author { name }',

@@ -1,4 +1,3 @@
-import { KeystoneContext } from '../../../../../types';
 import { integer } from '../../index';
 
 export const name = 'Integer with autoincrement default';

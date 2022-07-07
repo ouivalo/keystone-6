@@ -1,6 +1,14 @@
 import { Limit } from 'p-limit';
 import pluralize from 'pluralize';
-import { BaseItem, KeystoneConfig, KeystoneContext } from '../../types';
+import {
+  BaseItem,
+  BaseListTypeInfo,
+  BaseStandardListTypeInfo,
+  KeystoneConfig,
+  KeystoneContext,
+  KeystoneIndividualDbAPI,
+  KeystoneStandardListDbAPI,
+} from '../../types';
 import { humanize } from '../utils';
 import { prismaError } from './graphql-errors';
 import { InitialisedList, InitialisedStandardList } from './types-for-lists';
@@ -181,6 +189,16 @@ export const getWriteLimit = (context: KeystoneContext) => {
 export function throwIfNotStandardList(list: InitialisedList): InitialisedStandardList {
   if (list.kind !== 'list') {
     throw new Error(`${list.listKey} is not a standard list`);
+  }
+  return list;
+}
+
+export function throwIfNotStandardListDBAPI(
+  list: KeystoneIndividualDbAPI<BaseListTypeInfo>,
+  listKey: string
+): KeystoneStandardListDbAPI<BaseStandardListTypeInfo> {
+  if (list.kind !== 'list') {
+    throw new Error(`${listKey} is not a standard list`);
   }
   return list;
 }

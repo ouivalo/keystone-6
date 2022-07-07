@@ -39,7 +39,7 @@ export function createAdminMeta(
         : 'id');
 
     let initialColumns: string[];
-    if (listConfig.ui?.listView?.initialColumns) {
+    if (listConfig.kind === 'list' && listConfig.ui?.listView?.initialColumns) {
       // If they've asked for a particular thing, give them that thing
       initialColumns = listConfig.ui.listView.initialColumns as string[];
     } else {

@@ -99,25 +99,32 @@ export function printGeneratedTypes(
 
     const listTypeInfoName = `Lists.${listKey}.TypeInfo`;
 
+    const inputs =
+      list.kind === 'list'
+        ? `{
+      where: ${gqlNames.whereInputName};
+      uniqueWhere: ${gqlNames.whereUniqueInputName};
+      create: ${gqlNames.createInputName};
+      update: ${gqlNames.updateInputName};
+      orderBy: ${gqlNames.listOrderName};
+    };`
+        : `{
+      update: ${gqlNames.updateInputName};
+    };`;
+
     allListsStr += `\n  readonly ${listKey}: ${listTypeInfoName};`;
     listsNamespaceStr += `
   export type ${listKey} = import('@keystone-6/core').ListConfig<${listTypeInfoName}, any>;
   namespace ${listKey} {
     export type Item = import('.prisma/client').${listKey};
     export type TypeInfo = {
-      kind: 'list';
+      kind: ${list.kind};
       key: ${JSON.stringify(listKey)};
       fields: ${Object.keys(list.fields)
         .map(x => JSON.stringify(x))
         .join(' | ')}
       item: Item;
-      inputs: {
-        where: ${gqlNames.whereInputName};
-        uniqueWhere: ${gqlNames.whereUniqueInputName};
-        create: ${gqlNames.createInputName};
-        update: ${gqlNames.updateInputName};
-        orderBy: ${gqlNames.listOrderName};
-      };
+      inputs: ${inputs}
       all: __TypeInfo;
     };
   }`;

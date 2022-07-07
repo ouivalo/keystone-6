@@ -186,6 +186,35 @@ export type ListMetaRootVal = {
   description: string | null;
   kind: 'list' | 'singleton';
 };
+export type StandardListMetaRootVal = {
+  key: string;
+  path: string;
+  label: string;
+  singular: string;
+  plural: string;
+  initialColumns: string[];
+  pageSize: number;
+  labelField: string;
+  initialSort: { field: string; direction: 'ASC' | 'DESC' } | null;
+  fields: Array<FieldMetaRootVal>;
+  itemQueryName: string;
+  listQueryName: string;
+  description: string | null;
+  kind: 'list';
+};
+
+export type SingletonMetaRootVal = {
+  key: string;
+  path: string;
+  label: string;
+  singular: string;
+  pageSize: number;
+  fields: Array<FieldMetaRootVal>;
+  itemQueryName: string;
+  listQueryName: string;
+  description: string | null;
+  kind: 'singleton';
+};
 
 export type AdminMetaRootVal = {
   enableSignout: boolean;

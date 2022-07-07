@@ -112,6 +112,10 @@ export function getAdminMetaSchema({
                     return 'hidden';
                   }
                   const listConfig = config.lists[rootVal.listKey];
+                  if (listConfig.kind === 'singleton') {
+                    return 'hidden';
+                  }
+
                   const sessionFunction =
                     lists[rootVal.listKey].fields[rootVal.fieldPath].ui?.createView?.fieldMode ??
                     listConfig.ui?.createView?.defaultFieldMode;
@@ -150,6 +154,10 @@ export function getAdminMetaSchema({
                     return 'hidden';
                   }
                   const listConfig = config.lists[rootVal.listKey];
+                  if (listConfig.kind === 'singleton') {
+                    return 'hidden';
+                  }
+
                   const sessionFunction =
                     lists[rootVal.listKey].fields[rootVal.fieldPath].ui?.listView?.fieldMode ??
                     listConfig.ui?.listView?.defaultFieldMode;
@@ -271,7 +279,7 @@ export function getAdminMetaSchema({
             );
           }
           const listConfig = config.lists[rootVal.key];
-          return runMaybeFunction(listConfig.ui?.hideCreate, false, {
+          return runMaybeFunction(listConfig.kind === 'list' && listConfig.ui?.hideCreate, false, {
             session: context.session,
             context,
           });
@@ -286,7 +294,7 @@ export function getAdminMetaSchema({
             );
           }
           const listConfig = config.lists[rootVal.key];
-          return runMaybeFunction(listConfig.ui?.hideDelete, false, {
+          return runMaybeFunction(listConfig.kind === 'list' && listConfig.ui?.hideDelete, false, {
             session: context.session,
             context,
           });

@@ -128,7 +128,7 @@ function getIsEnabled(listsConfig: KeystoneConfig['lists']) {
       isEnabled[listKey] = {
         type: true,
         query: !omit.includes('query'),
-        create: !omit.includes('create'),
+        create: listConfig.kind === 'list' && !(omit as readonly string[]).includes('create'),
         update: !omit.includes('update'),
         delete: listConfig.kind === 'list' && !(omit as readonly string[]).includes('delete'),
         filter: defaultIsFilterable ?? listConfig.kind === 'list',

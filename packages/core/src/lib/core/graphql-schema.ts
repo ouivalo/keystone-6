@@ -2,7 +2,7 @@ import { GraphQLNamedType, GraphQLSchema } from 'graphql';
 import { graphql } from '../..';
 import { InitialisedList } from './types-for-lists';
 
-import { getMutationsForList } from './mutations';
+import { getMutationsForSingletonList, getMutationsForStandardList } from './mutations';
 import { getQueriesForList } from './queries';
 
 export function getGraphQLSchema(
@@ -28,7 +28,12 @@ export function getGraphQLSchema(
     fields: Object.assign(
       {},
       ...Object.values(lists).map(list => {
-        const { mutations, updateManyInput } = getMutationsForList(list);
+        if (list.kind === 'singleton') {
+          const { mutations } = getMutationsForSingletonList(list);
+          return mutations;
+        }
+
+        const { mutations, updateManyInput } = getMutationsForStandardList(list);
         updateManyByList[list.listKey] = updateManyInput;
         return mutations;
       }),
