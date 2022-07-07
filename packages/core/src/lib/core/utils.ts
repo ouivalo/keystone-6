@@ -2,11 +2,9 @@ import { Limit } from 'p-limit';
 import pluralize from 'pluralize';
 import {
   BaseItem,
-  BaseListTypeInfo,
   BaseStandardListTypeInfo,
   KeystoneConfig,
   KeystoneContext,
-  KeystoneIndividualDbAPI,
   KeystoneStandardListDbAPI,
 } from '../../types';
 import { humanize } from '../utils';
@@ -193,12 +191,14 @@ export function throwIfNotStandardList(list: InitialisedList): InitialisedStanda
   return list;
 }
 
-export function throwIfNotStandardListDBAPI(
-  list: KeystoneIndividualDbAPI<BaseListTypeInfo>,
+export function getStandardListDbAPI(
+  context: KeystoneContext,
   listKey: string
 ): KeystoneStandardListDbAPI<BaseStandardListTypeInfo> {
-  if (list.kind !== 'list') {
+  const db = context.db[listKey];
+
+  if (db.kind !== 'list') {
     throw new Error(`${listKey} is not a standard list`);
   }
-  return list;
+  return db;
 }

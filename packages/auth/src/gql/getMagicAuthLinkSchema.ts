@@ -1,6 +1,11 @@
 import type { BaseItem } from '@keystone-6/core/types';
 import { graphql } from '@keystone-6/core';
-import { AuthGqlNames, AuthTokenTypeConfig, SecretFieldImpl } from '../types';
+import {
+  AuthGqlNames,
+  AuthTokenTypeConfig,
+  ContextWithOnlyStandardLists,
+  SecretFieldImpl,
+} from '../types';
 
 import { createAuthToken } from '../lib/createAuthToken';
 import { validateAuthToken } from '../lib/validateAuthToken';
@@ -60,7 +65,7 @@ export function getMagicAuthLinkSchema<I extends string>({
         type: graphql.nonNull(graphql.Boolean),
         args: { [identityField]: graphql.arg({ type: graphql.nonNull(graphql.String) }) },
         async resolve(rootVal, { [identityField]: identity }, context) {
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const tokenType = 'magicAuth';
 
           const result = await createAuthToken(identityField, identity, dbItemAPI);
@@ -94,7 +99,7 @@ export function getMagicAuthLinkSchema<I extends string>({
             throw new Error('No session implementation available on context');
           }
 
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const tokenType = 'magicAuth';
           const result = await validateAuthToken(
             listKey,

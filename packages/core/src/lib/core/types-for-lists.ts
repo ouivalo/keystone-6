@@ -11,8 +11,9 @@ import {
   FindManyArgs,
   CacheHintArgs,
   MaybePromise,
+  SingletonConfig,
 } from '../../types';
-import { graphql } from '../..';
+import { graphql, ListConfig } from '../..';
 import { FieldHooks } from '../../types/config/hooks';
 import { FilterOrderArgs } from '../../types/config/fields';
 import {
@@ -65,9 +66,15 @@ type CommonInitialisedList = {
   };
 };
 
-export type InitialisedSingleton = { kind: 'singleton' } & CommonInitialisedList;
+export type InitialisedSingleton = {
+  kind: 'singleton';
+  config: SingletonConfig<any, any>;
+} & CommonInitialisedList;
 
-export type InitialisedStandardList = { kind: 'list' } & CommonInitialisedList;
+export type InitialisedStandardList = {
+  kind: 'list';
+  config: ListConfig<any, any>;
+} & CommonInitialisedList;
 
 export type InitialisedList = InitialisedStandardList | InitialisedSingleton;
 
@@ -527,7 +534,6 @@ export function initialiseLists(config: KeystoneConfig): Record<string, Initiali
       ...intermediateList,
       /** These properties weren't related to any of the above actions but need to be here */
       hooks: intermediateList.hooks || {},
-      kind: listConfig.kind,
       cacheHint: (() => {
         const cacheHint = listConfig.graphql?.cacheHint;
         if (cacheHint === undefined) {
@@ -542,6 +548,9 @@ export function initialiseLists(config: KeystoneConfig): Record<string, Initiali
       listKey,
       /** Add self-reference */
       lists: listsRef,
+      ...(listConfig.kind === 'list'
+        ? { kind: listConfig.kind, config: listConfig }
+        : { kind: listConfig.kind, config: listConfig }),
     };
   }
 

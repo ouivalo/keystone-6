@@ -3,7 +3,6 @@
 
 import {
   Fragment,
-  HTMLAttributes,
   memo,
   ReactElement,
   useCallback,
@@ -14,7 +13,7 @@ import {
 } from 'react';
 
 import { Button } from '@keystone-ui/button';
-import { Box, Center, Stack, Text, jsx, useTheme } from '@keystone-ui/core';
+import { Box, Center, Stack, Text, jsx } from '@keystone-ui/core';
 import { LoadingDots } from '@keystone-ui/loading';
 import { AlertDialog } from '@keystone-ui/modals';
 import { Notice } from '@keystone-ui/notice';

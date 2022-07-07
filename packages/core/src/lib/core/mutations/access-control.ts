@@ -2,7 +2,7 @@ import { KeystoneContext } from '../../../types';
 import { accessDeniedError, accessReturnError, extensionError } from '../graphql-errors';
 import { mapUniqueWhereToWhere } from '../queries/resolvers';
 import { InitialisedStandardList, InitialisedList } from '../types-for-lists';
-import { runWithPrisma, throwIfNotStandardListDBAPI } from '../utils';
+import { runWithPrisma, getStandardListDbAPI } from '../utils';
 import {
   InputFilter,
   resolveUniqueWhereInput,
@@ -54,7 +54,7 @@ export async function checkUniqueItemExists(
   const uniqueWhere = await resolveUniqueWhereInput(uniqueInput, foreignList.fields, context);
   // Check whether the item exists (from this users POV).
   try {
-    const dbApi = throwIfNotStandardListDBAPI(context.db[foreignList.listKey], foreignList.listKey);
+    const dbApi = getStandardListDbAPI(context, foreignList.listKey);
 
     if (dbApi.kind !== 'list') {
       throw new Error(`${dbApi.kind} is not a standard list`);

@@ -8,8 +8,7 @@ export function createGraphQLSchema(
   lists: Record<string, InitialisedList>,
   adminMeta: AdminMetaRootVal
 ) {
-  // console.log(adminMeta);
-
+  const adminMetaSchema = getAdminMetaSchema({ adminMeta, config, lists });
   // Start with the core keystone graphQL schema
   let graphQLSchema = getGraphQLSchema(lists, {
     mutation: config.session
@@ -25,7 +24,8 @@ export function createGraphQLSchema(
           }),
         }
       : {},
-    query: getAdminMetaSchema({ adminMeta, config, lists }),
+    query: adminMetaSchema.fields,
+    types: adminMetaSchema.types,
   });
 
   // Merge in the user defined graphQL API

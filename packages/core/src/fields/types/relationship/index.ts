@@ -90,7 +90,7 @@ export const relationship =
       getAdminMeta: (
         adminMetaRoot: AdminMetaRootVal
       ): Parameters<typeof import('./views').controller>[0]['fieldMeta'] => {
-        if (!meta.lists[foreignListKey]) {
+        if (!meta.lists[foreignListKey] || meta.lists[foreignListKey].kind === 'singleton') {
           throw new Error(
             `The ref [${ref}] on relationship [${meta.listKey}.${meta.fieldKey}] is invalid`
           );

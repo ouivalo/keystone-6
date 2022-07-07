@@ -413,29 +413,14 @@ type KeystoneAdminMeta {
   list(key: String!): KeystoneAdminUIListMeta
 }
 
-type KeystoneAdminUIListMeta {
+interface KeystoneAdminUIListMeta {
   key: String!
-  itemQueryName: String!
-  listQueryName: String!
-  plural: String!
-  hideCreate: Boolean!
-  hideDelete: Boolean!
   path: String!
   label: String!
   singular: String!
-  kind: kind!
   description: String
-  initialColumns: [String!]!
-  pageSize: Int!
-  labelField: String!
   fields: [KeystoneAdminUIFieldMeta!]!
-  initialSort: KeystoneAdminUISort
   isHidden: Boolean!
-}
-
-enum kind {
-  list
-  singleton
 }
 
 type KeystoneAdminUIFieldMeta {
@@ -479,6 +464,34 @@ enum KeystoneAdminUIFieldMetaItemViewFieldMode {
   edit
   read
   hidden
+}
+
+type KeystoneAdminUISingletonListMeta implements KeystoneAdminUIListMeta {
+  key: String!
+  path: String!
+  label: String!
+  singular: String!
+  description: String
+  fields: [KeystoneAdminUIFieldMeta!]!
+  isHidden: Boolean!
+}
+
+type KeystoneAdminUIStandardListMeta implements KeystoneAdminUIListMeta {
+  key: String!
+  path: String!
+  label: String!
+  singular: String!
+  description: String
+  fields: [KeystoneAdminUIFieldMeta!]!
+  isHidden: Boolean!
+  listQueryName: String!
+  plural: String!
+  hideCreate: Boolean!
+  hideDelete: Boolean!
+  initialColumns: [String!]!
+  pageSize: Int!
+  labelField: String!
+  initialSort: KeystoneAdminUISort
 }
 
 type KeystoneAdminUISort {

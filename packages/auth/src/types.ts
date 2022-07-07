@@ -67,3 +67,10 @@ export type SecretFieldImpl = {
   generateHash: (secret: string) => Promise<string>;
   compare: (secret: string, hash: string) => Promise<string>;
 };
+
+// this type is strictly speaking _wrong_
+// but there's no easy way to make it correct right now
+export type ContextWithOnlyStandardLists = KeystoneContext<{
+  lists: Record<string, BaseStandardListTypeInfo>;
+  prisma: any;
+}>;

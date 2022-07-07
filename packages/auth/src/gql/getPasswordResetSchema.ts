@@ -1,5 +1,10 @@
 import { graphql } from '@keystone-6/core';
-import { AuthGqlNames, AuthTokenTypeConfig, SecretFieldImpl } from '../types';
+import {
+  AuthGqlNames,
+  AuthTokenTypeConfig,
+  ContextWithOnlyStandardLists,
+  SecretFieldImpl,
+} from '../types';
 
 import { createAuthToken } from '../lib/createAuthToken';
 import { validateAuthToken } from '../lib/validateAuthToken';
@@ -45,9 +50,8 @@ export function getPasswordResetSchema<I extends string, S extends string>({
         type: graphql.nonNull(graphql.Boolean),
         args: { [identityField]: graphql.arg({ type: graphql.nonNull(graphql.String) }) },
         async resolve(rootVal, { [identityField]: identity }, context) {
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const tokenType = 'passwordReset';
-
           const result = await createAuthToken(identityField, identity, dbItemAPI);
 
           // Update system state
@@ -80,7 +84,7 @@ export function getPasswordResetSchema<I extends string, S extends string>({
           { [identityField]: identity, token, [secretField]: secret },
           context
         ) {
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const tokenType = 'passwordReset';
           const result = await validateAuthToken(
             listKey,

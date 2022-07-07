@@ -2,7 +2,7 @@ import { graphql } from '@keystone-6/core';
 import { BaseItem } from '@keystone-6/core/types';
 import { assertInputObjectType, GraphQLInputObjectType, GraphQLSchema } from 'graphql';
 
-import { AuthGqlNames, InitFirstItemConfig } from '../types';
+import { AuthGqlNames, ContextWithOnlyStandardLists, InitFirstItemConfig } from '../types';
 
 export function getInitFirstItemSchema({
   listKey,
@@ -45,7 +45,7 @@ export function getInitFirstItemSchema({
             throw new Error('No session implementation available on context');
           }
 
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const count = await dbItemAPI.count({});
           if (count !== 0) {
             throw new Error('Initial items can only be created when no items exist in that list');

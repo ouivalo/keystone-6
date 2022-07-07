@@ -118,7 +118,7 @@ export function printGeneratedTypes(
   namespace ${listKey} {
     export type Item = import('.prisma/client').${listKey};
     export type TypeInfo = {
-      kind: ${list.kind};
+      kind: ${JSON.stringify(list.kind)};
       key: ${JSON.stringify(listKey)};
       fields: ${Object.keys(list.fields)
         .map(x => JSON.stringify(x))

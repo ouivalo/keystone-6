@@ -1,5 +1,5 @@
 import { GraphQLString, isInputObjectType } from 'graphql';
-import { KeystoneConfig, AdminMetaRootVal, QueryMode } from '../../types';
+import { KeystoneConfig, AdminMetaRootVal, QueryMode, ListMetaRootValCommon } from '../../types';
 import { humanize } from '../../lib/utils';
 import { InitialisedList } from '../../lib/core/types-for-lists';
 
@@ -7,7 +7,7 @@ export function createAdminMeta(
   config: KeystoneConfig,
   initialisedLists: Record<string, InitialisedList>
 ) {
-  const { ui, lists, session } = config;
+  const { ui, session } = config;
   const adminMetaRoot: AdminMetaRootVal = {
     enableSessionItem: ui?.enableSessionItem || false,
     enableSignout: session !== undefined,
@@ -19,7 +19,6 @@ export function createAdminMeta(
   const omittedLists: string[] = [];
 
   for (const [key, list] of Object.entries(initialisedLists)) {
-    const listConfig = lists[key];
     if (list.graphql.isEnabled.query === false) {
       // If graphql querying is disabled on the list,
       // push the key into the ommittedLists array for use further down in the procedure and skip.
@@ -27,55 +26,64 @@ export function createAdminMeta(
 
       continue;
     }
-    // Default the labelField to `name`, `label`, or `title` if they exist; otherwise fall back to `id`
-    const labelField =
-      (listConfig.ui?.labelField as string | undefined) ??
-      (listConfig.fields.label
-        ? 'label'
-        : listConfig.fields.name
-        ? 'name'
-        : listConfig.fields.title
-        ? 'title'
-        : 'id');
-
-    let initialColumns: string[];
-    if (listConfig.kind === 'list' && listConfig.ui?.listView?.initialColumns) {
-      // If they've asked for a particular thing, give them that thing
-      initialColumns = listConfig.ui.listView.initialColumns as string[];
-    } else {
-      // Otherwise, we'll start with the labelField on the left and then add
-      // 2 more fields to the right of that. We don't include the 'id' field
-      // unless it happened to be the labelField
-      initialColumns = [
-        labelField,
-        ...Object.keys(list.fields)
-          .filter(fieldKey => list.fields[fieldKey].graphql.isEnabled.read)
-          .filter(fieldKey => fieldKey !== labelField)
-          .filter(fieldKey => fieldKey !== 'id'),
-      ].slice(0, 3);
-    }
-
-    adminMetaRoot.listsByKey[key] = {
+    const common: ListMetaRootValCommon = {
       key,
-      labelField,
-      description: listConfig.ui?.description ?? listConfig.description ?? null,
+      description: list.config.ui?.description ?? list.config.description ?? null,
       label: list.adminUILabels.label,
       singular: list.adminUILabels.singular,
       path: list.adminUILabels.path,
       fields: [],
-      pageSize: listConfig.ui?.listView?.pageSize ?? 50,
-      initialColumns,
-      initialSort:
-        (listConfig.ui?.listView?.initialSort as
-          | { field: string; direction: 'ASC' | 'DESC' }
-          | undefined) ?? null,
-      // TODO: probably remove this from the GraphQL schema and here
-      itemQueryName: key,
-      ...(list.kind === 'list'
-        ? { listQueryName: list.pluralGraphQLName, plural: list.adminUILabels.plural }
-        : { listQueryName: '', plural: '' }),
-      kind: list.kind,
     };
+
+    if (list.kind === 'list') {
+      // Default the labelField to `name`, `label`, or `title` if they exist; otherwise fall back to `id`
+      const labelField =
+        (list.config.ui?.labelField as string | undefined) ??
+        (list.config.fields.label
+          ? 'label'
+          : list.config.fields.name
+          ? 'name'
+          : list.config.fields.title
+          ? 'title'
+          : 'id');
+
+      let initialColumns: string[];
+      if (list.config.kind === 'list' && list.config.ui?.listView?.initialColumns) {
+        // If they've asked for a particular thing, give them that thing
+        initialColumns = list.config.ui.listView.initialColumns as string[];
+      } else {
+        // Otherwise, we'll start with the labelField on the left and then add
+        // 2 more fields to the right of that. We don't include the 'id' field
+        // unless it happened to be the labelField
+        initialColumns = [
+          labelField,
+          ...Object.keys(list.fields)
+            .filter(fieldKey => list.fields[fieldKey].graphql.isEnabled.read)
+            .filter(fieldKey => fieldKey !== labelField)
+            .filter(fieldKey => fieldKey !== 'id'),
+        ].slice(0, 3);
+      }
+
+      adminMetaRoot.listsByKey[key] = {
+        ...common,
+        labelField,
+        pageSize: list.config.ui?.listView?.pageSize ?? 50,
+        initialColumns,
+        initialSort:
+          (list.config.ui?.listView?.initialSort as
+            | { field: string; direction: 'ASC' | 'DESC' }
+            | undefined) ?? null,
+        listQueryName: list.pluralGraphQLName,
+        plural: list.adminUILabels.plural,
+        kind: 'list',
+      };
+    } else {
+      adminMetaRoot.listsByKey[key] = {
+        ...common,
+        kind: 'singleton',
+      };
+    }
+
     adminMetaRoot.lists.push(adminMetaRoot.listsByKey[key]);
   }
   let uniqueViewCount = -1;
@@ -92,16 +100,18 @@ export function createAdminMeta(
   // Populate .fields array
   for (const [key, list] of Object.entries(initialisedLists)) {
     if (omittedLists.includes(key)) continue;
-    const searchFields = new Set(config.lists[key].ui?.searchFields ?? []);
-    if (searchFields.has('id')) {
-      throw new Error(
-        `The ui.searchFields option on the ${key} list includes 'id'. Lists can always be searched by an item's id so it must not be specified as a search field`
-      );
-    }
-
+    let searchFields = new Set();
     const possibleSearchFields = new Map<string, 'default' | 'insensitive' | null>();
 
     if (list.kind === 'list') {
+      searchFields = new Set(list.config.ui?.searchFields ?? []);
+
+      if (searchFields.has('id')) {
+        throw new Error(
+          `The ui.searchFields option on the ${key} list includes 'id'. Lists can always be searched by an item's id so it must not be specified as a search field`
+        );
+      }
+
       const whereInputFields = list.types.where.graphQLType.getFields();
 
       for (const fieldKey of Object.keys(list.fields)) {
@@ -114,12 +124,6 @@ export function createAdminMeta(
             fieldKey,
             fieldFilterFields?.mode?.type === QueryMode.graphQLType ? 'insensitive' : 'default'
           );
-        }
-      }
-      if (config.lists[key].ui?.searchFields === undefined) {
-        const labelField = adminMetaRoot.listsByKey[key].labelField;
-        if (possibleSearchFields.has(labelField)) {
-          searchFields.add(labelField);
         }
       }
     }

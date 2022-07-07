@@ -12,22 +12,10 @@ export const staticAdminMetaQuery = gql`
         lists {
           __typename
           key
-          itemQueryName
-          listQueryName
-          initialSort {
-            __typename
-            field
-            direction
-          }
-          kind
           path
           label
           singular
-          plural
           description
-          initialColumns
-          pageSize
-          labelField
           fields {
             __typename
             path
@@ -41,6 +29,18 @@ export const staticAdminMetaQuery = gql`
               fieldMode
             }
           }
+          ... on KeystoneAdminUIStandardListMeta {
+            listQueryName
+            initialSort {
+              __typename
+              field
+              direction
+            }
+            plural
+            initialColumns
+            pageSize
+            labelField
+          }
         }
       }
     }
@@ -53,16 +53,14 @@ export const staticAdminMetaQuery = gql`
 //     plugins:
 //       - typescript-operations:
 //           namingConvention: keep
-//       - typescript:
-//           enumsAsTypes: true
-//           nonOptionalTypename: true
-//           namingConvention: keep
-//           noExport: true
+//           skipTypeNameForRoot: true
 //           avoidOptionals: true
 //           scalars:
 //             JSON: JSONValue
-
-type Maybe<T> = T | null;
+//       - typescript:
+//           onlyEnums: true
+//           enumsAsTypes: true
+//           namingConvention: keep
 
 export type StaticAdminMetaQuery = {
   keystone: {
@@ -71,46 +69,68 @@ export type StaticAdminMetaQuery = {
       __typename: 'KeystoneAdminMeta';
       enableSignout: boolean;
       enableSessionItem: boolean;
-      lists: Array<{
-        __typename: 'KeystoneAdminUIListMeta';
-        key: string;
-        itemQueryName: string;
-        listQueryName: string;
-        path: string;
-        label: string;
-        singular: string;
-        plural: string;
-        description: Maybe<string>;
-        initialColumns: Array<string>;
-        pageSize: number;
-        labelField: string;
-        kind: 'list' | 'singleton';
-        initialSort: Maybe<{
-          __typename: 'KeystoneAdminUISort';
-          field: string;
-          direction: KeystoneAdminUISortDirection;
-        }>;
-        fields: Array<{
-          __typename: 'KeystoneAdminUIFieldMeta';
-          path: string;
-          label: string;
-          description: Maybe<string>;
-          fieldMeta: Maybe<JSONValue>;
-          viewsIndex: number;
-          customViewsIndex: Maybe<number>;
-          search: Maybe<QueryMode>;
-          itemView: Maybe<{
-            __typename: 'KeystoneAdminUIFieldMetaItemView';
-            fieldMode: Maybe<KeystoneAdminUIFieldMetaItemViewFieldMode>;
-          }>;
-        }>;
-      }>;
+      lists: Array<
+        | {
+            __typename: 'KeystoneAdminUISingletonListMeta';
+            key: string;
+            path: string;
+            label: string;
+            singular: string;
+            description: string | null;
+            fields: Array<{
+              __typename: 'KeystoneAdminUIFieldMeta';
+              path: string;
+              label: string;
+              description: string | null;
+              fieldMeta: any | null;
+              viewsIndex: number;
+              customViewsIndex: number | null;
+              search: QueryMode | null;
+              itemView: {
+                __typename?: 'KeystoneAdminUIFieldMetaItemView';
+                fieldMode: KeystoneAdminUIFieldMetaItemViewFieldMode | null;
+              } | null;
+            }>;
+          }
+        | {
+            __typename: 'KeystoneAdminUIStandardListMeta';
+            listQueryName: string;
+            plural: string;
+            initialColumns: Array<string>;
+            pageSize: number;
+            labelField: string;
+            key: string;
+            path: string;
+            label: string;
+            singular: string;
+            description: string | null;
+            initialSort: {
+              __typename: 'KeystoneAdminUISort';
+              field: string;
+              direction: KeystoneAdminUISortDirection;
+            } | null;
+            fields: Array<{
+              __typename: 'KeystoneAdminUIFieldMeta';
+              path: string;
+              label: string;
+              description: string | null;
+              fieldMeta: any | null;
+              viewsIndex: number;
+              customViewsIndex: number | null;
+              search: QueryMode | null;
+              itemView: {
+                __typename?: 'KeystoneAdminUIFieldMetaItemView';
+                fieldMode: KeystoneAdminUIFieldMetaItemViewFieldMode | null;
+              } | null;
+            }>;
+          }
+      >;
     };
   };
 };
 
-type QueryMode = 'default' | 'insensitive';
-
 type KeystoneAdminUIFieldMetaItemViewFieldMode = 'edit' | 'read' | 'hidden';
+
+type QueryMode = 'default' | 'insensitive';
 
 type KeystoneAdminUISortDirection = 'ASC' | 'DESC';

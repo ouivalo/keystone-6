@@ -10,12 +10,6 @@ import {
 import { executeGraphQLFieldToRootVal } from './executeGraphQLFieldToRootVal';
 import { executeGraphQLFieldWithSelection } from './executeGraphQLFieldWithSelection';
 
-// this is generally incorrect because types are open in TS but is correct in the specific usage here.
-// (i mean it's not really any more incorrect than TS is generally is but let's ignore that)
-const objectEntriesButUsingKeyof: <T extends Record<string, any>>(
-  obj: T
-) => [keyof T, T[keyof T]][] = Object.entries as any;
-
 export function getDbAPIFactory(
   gqlNames: GqlNames,
   schema: GraphQLSchema,
@@ -35,46 +29,33 @@ export function getDbAPIFactory(
     return executeGraphQLFieldToRootVal(field);
   };
 
-  const singletonApi = {
-    read: f('query', gqlNames.itemQueryName),
-    update: f('mutation', gqlNames.updateMutationName),
-  };
-
-  if (kind === 'singleton') {
-    return (context: KeystoneContext) => {
-      return {
-        ...(Object.fromEntries(
-          objectEntriesButUsingKeyof(singletonApi).map(([key, impl]) => [
-            key,
-            (args: Record<string, any>) => impl(args, context),
-          ])
-        ) as Record<keyof typeof singletonApi, any>),
-        kind: 'singleton',
-      };
-    };
-  }
-
-  const api = {
-    findOne: f('query', gqlNames.itemQueryName),
-    findMany: f('query', gqlNames.listQueryName),
-    count: f('query', gqlNames.listQueryCountName),
-    createOne: f('mutation', gqlNames.createMutationName),
-    createMany: f('mutation', gqlNames.createManyMutationName),
-    updateOne: f('mutation', gqlNames.updateMutationName),
-    updateMany: f('mutation', gqlNames.updateManyMutationName),
-    deleteOne: f('mutation', gqlNames.deleteMutationName),
-    deleteMany: f('mutation', gqlNames.deleteManyMutationName),
-  };
+  const api =
+    kind === 'singleton'
+      ? {
+          read: f('query', gqlNames.itemQueryName),
+          update: f('mutation', gqlNames.updateMutationName),
+        }
+      : {
+          findOne: f('query', gqlNames.itemQueryName),
+          findMany: f('query', gqlNames.listQueryName),
+          count: f('query', gqlNames.listQueryCountName),
+          createOne: f('mutation', gqlNames.createMutationName),
+          createMany: f('mutation', gqlNames.createManyMutationName),
+          updateOne: f('mutation', gqlNames.updateMutationName),
+          updateMany: f('mutation', gqlNames.updateManyMutationName),
+          deleteOne: f('mutation', gqlNames.deleteMutationName),
+          deleteMany: f('mutation', gqlNames.deleteManyMutationName),
+        };
 
   return (context: KeystoneContext) => {
     return {
       ...(Object.fromEntries(
-        objectEntriesButUsingKeyof(api).map(([key, impl]) => [
+        Object.entries(api).map(([key, impl]) => [
           key,
           (args: Record<string, any>) => impl(args, context),
         ])
       ) as Record<keyof typeof api, any>),
-      kind: 'list',
+      kind,
     };
   };
 }

@@ -1,5 +1,5 @@
 import pLimit from 'p-limit';
-import { FieldData, KeystoneConfig, getGqlNames } from '../types';
+import { FieldData, KeystoneConfig, getGqlNames, BaseListTypeInfo, BaseFields } from '../types';
 
 import { createAdminMeta } from '../admin-ui/system/createAdminMeta';
 import { createGraphQLSchema } from './createGraphQLSchema';
@@ -34,21 +34,23 @@ function getSudoGraphQLSchema(config: KeystoneConfig) {
             access: { operation: {}, item: {}, filter: {} },
             graphql: { ...(list.graphql || {}), omit: [] },
             fields: Object.fromEntries(
-              Object.entries(list.fields).map(([fieldKey, field]) => {
-                return [
-                  fieldKey,
-                  (data: FieldData) => {
-                    const f = field(data);
-                    return {
-                      ...f,
-                      access: () => true,
-                      isFilterable: true,
-                      isOrderable: true,
-                      graphql: { ...(f.graphql || {}), omit: [] },
-                    };
-                  },
-                ];
-              })
+              Object.entries(list.fields as BaseFields<BaseListTypeInfo>).map(
+                ([fieldKey, field]) => {
+                  return [
+                    fieldKey,
+                    (data: FieldData) => {
+                      const f = field(data);
+                      return {
+                        ...f,
+                        access: () => true,
+                        isFilterable: true,
+                        isOrderable: true,
+                        graphql: { ...(f.graphql || {}), omit: [] },
+                      };
+                    },
+                  ];
+                }
+              )
             ),
           },
         ];

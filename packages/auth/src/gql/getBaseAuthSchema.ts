@@ -1,6 +1,6 @@
 import type { BaseItem } from '@keystone-6/core/types';
 import { graphql } from '@keystone-6/core';
-import { AuthGqlNames, SecretFieldImpl } from '../types';
+import { AuthGqlNames, ContextWithOnlyStandardLists, SecretFieldImpl } from '../types';
 
 import { validateSecret } from '../lib/validateSecret';
 
@@ -53,7 +53,8 @@ export function getBaseAuthSchema<I extends string, S extends string>({
           types: [base.object(listKey) as graphql.ObjectType<BaseItem>],
           resolveType: (root, context) => context.session?.listKey,
         }),
-        resolve(root, args, { session, db }) {
+        resolve(root, args, context) {
+          const { db, session } = context as ContextWithOnlyStandardLists;
           if (typeof session?.itemId === 'string' && typeof session.listKey === 'string') {
             return db[session.listKey].findOne({ where: { id: session.itemId } });
           }
@@ -73,7 +74,7 @@ export function getBaseAuthSchema<I extends string, S extends string>({
             throw new Error('No session implementation available on context');
           }
 
-          const dbItemAPI = context.sudo().db[listKey];
+          const dbItemAPI = (context as ContextWithOnlyStandardLists).sudo().db[listKey];
           const result = await validateSecret(
             secretFieldImpl,
             identityField,

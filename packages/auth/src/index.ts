@@ -10,7 +10,7 @@ import {
 } from '@keystone-6/core/types';
 import { password, timestamp } from '@keystone-6/core/fields';
 
-import { AuthConfig, AuthGqlNames } from './types';
+import { AuthConfig, AuthGqlNames, ContextWithOnlyStandardLists } from './types';
 import { getSchemaExtension } from './schema';
 import { signinTemplate } from './templates/signin';
 import { initTemplate } from './templates/init';
@@ -104,7 +104,7 @@ export function createAuth<ListTypeInfo extends BaseStandardListTypeInfo>({
     }
 
     if (!session && initFirstItem) {
-      const count = await context.sudo().query[listKey].count({});
+      const count = await (context as ContextWithOnlyStandardLists).sudo().query[listKey].count({});
       if (count === 0) {
         if (pathname !== '/init') {
           return { kind: 'redirect', to: '/init' };
@@ -227,7 +227,7 @@ export function createAuth<ListTypeInfo extends BaseStandardListTypeInfo>({
       ...sessionStrategy,
       get: async ({ req, createContext }) => {
         const session = await get({ req, createContext });
-        const sudoContext = createContext({ sudo: true });
+        const sudoContext = createContext({ sudo: true }) as ContextWithOnlyStandardLists;
         if (
           !session ||
           !session.listKey ||
@@ -269,6 +269,12 @@ export function createAuth<ListTypeInfo extends BaseStandardListTypeInfo>({
     keystoneConfig: KeystoneConfig<TypeInfo>
   ): KeystoneConfig<TypeInfo> => {
     validateConfig(keystoneConfig);
+    const kind = keystoneConfig.lists[listKey].kind;
+    if (kind !== 'list') {
+      throw new Error(
+        `"${listKey}" was passed as the listKey to createAuth which expects a standard list but it is a ${kind} list`
+      );
+    }
     let ui = keystoneConfig.ui;
     if (!keystoneConfig.ui?.isDisabled) {
       ui = {
@@ -287,7 +293,7 @@ export function createAuth<ListTypeInfo extends BaseStandardListTypeInfo>({
           const accessingInitPage =
             url?.pathname === '/init' &&
             url?.host === host &&
-            (await context.sudo().query[listKey].count({})) === 0;
+            (await (context as ContextWithOnlyStandardLists).sudo().query[listKey].count({})) === 0;
           return (
             accessingInitPage ||
             (keystoneConfig.ui?.isAccessAllowed
