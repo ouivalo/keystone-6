@@ -1,0 +1,69 @@
+import { Markdown } from '../../../components/Markdown';
+import { Well } from '../../../components/primitives/Well';
+import { RelatedContent } from '../../../components/RelatedContent';
+
+# Singletons
+
+In Keystone, a Singleton is a list type that contains only one entry.
+
+## Configuration
+
+A little about the configuration differences
+
+### Hooks
+
+Differences in Hooks to Standard List
+
+- no `validateDelete`
+- no `create` operation??
+
+### Access Control
+
+Differences in `access` API to Standard List
+
+- No Filter - just operation and item
+- No create and delete on `operation` or `item`
+
+### UI config
+
+- no list view
+- hideCreate, hideDelete, createView, searchFields don't exist
+
+### GraphQL Config
+
+- queryLimits
+- omit only accepts `query` and `update` or true to omit both
+
+## Admin UI
+
+- No create or delete
+- no list view
+- clicking on the nav goes to the item
+
+## Graphql
+
+- no create or delete mutations
+- Only update with no `where`
+- no plural queries
+
+## Query and DB API
+
+- no findMany
+- no createOne, createMany etc
+
+## Filter
+
+- no filtering
+
+## Related resources
+
+<RelatedContent>
+  <Well
+    heading="Schema API"
+    href="../apis/schema"
+    >
+    Documentation for the Schema API 
+  </Well>
+</RelatedContent>
+
+export default ({ children }) => <Markdown description="A guide to the Singleton List type">{children}</Markdown>;

@@ -164,15 +164,16 @@ export function DocsNavigation() {
         <NavItem href="/docs/guides/choosing-a-database">
           Choosing a Database <Badge look="success">New</Badge>
         </NavItem>
+        <NavItem href="/docs/guides/singletons">
+          Singletons <Badge look="success">New</Badge>
+        </NavItem>
         <NavItem href="/docs/guides/filters">
           Query Filters <Badge look="success">Updated</Badge>
         </NavItem>
         <NavItem href="/docs/guides/hooks">
           Hooks <Badge look="success">Updated</Badge>
         </NavItem>
-        <NavItem href="/docs/guides/auth-and-access-control">
-          Auth and Access Control <Badge look="success">New</Badge>
-        </NavItem>
+        <NavItem href="/docs/guides/auth-and-access-control">Auth and Access Control</NavItem>
         {/* Disable placeholder for now */}
         {/* <NavItem href="/docs/guides/schema-extension" isPlaceholder>
           Schema Extension
