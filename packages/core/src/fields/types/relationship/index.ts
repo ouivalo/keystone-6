@@ -90,11 +90,18 @@ export const relationship =
       getAdminMeta: (
         adminMetaRoot: AdminMetaRootVal
       ): Parameters<typeof import('./views').controller>[0]['fieldMeta'] => {
-        if (!meta.lists[foreignListKey] || meta.lists[foreignListKey].kind === 'singleton') {
+        if (!meta.lists[foreignListKey]) {
           throw new Error(
             `The ref [${ref}] on relationship [${meta.listKey}.${meta.fieldKey}] is invalid`
           );
         }
+
+        const foreignList = adminMetaRoot.listsByKey[foreignListKey];
+
+        if (foreignList.kind === 'singleton') {
+          throw new Error('Items cannot relate to a singleton');
+        }
+
         if (config.ui?.displayMode === 'cards') {
           // we're checking whether the field which will be in the admin meta at the time that getAdminMeta is called.
           // in newer versions of keystone, it will be there and it will not be there for older versions of keystone.
@@ -104,9 +111,7 @@ export const relationship =
             x => x.path === meta.fieldKey
           );
           if (currentField) {
-            const allForeignFields = new Set(
-              adminMetaRoot.listsByKey[foreignListKey].fields.map(x => x.path)
-            );
+            const allForeignFields = new Set(foreignList.fields.map(x => x.path));
             for (const [configOption, foreignFields] of [
               ['ui.cardFields', config.ui.cardFields],
               ['ui.inlineCreate.fields', config.ui.inlineCreate?.fields ?? []],
@@ -136,13 +141,13 @@ export const relationship =
                 inlineCreate: config.ui.inlineCreate ?? null,
                 inlineEdit: config.ui.inlineEdit ?? null,
                 inlineConnect: config.ui.inlineConnect ?? false,
-                refLabelField: adminMetaRoot.listsByKey[foreignListKey].labelField,
+                refLabelField: foreignList.labelField,
               }
             : config.ui?.displayMode === 'count'
             ? { displayMode: 'count' }
             : {
                 displayMode: 'select',
-                refLabelField: adminMetaRoot.listsByKey[foreignListKey].labelField,
+                refLabelField: foreignList.labelField,
               }),
         };
       },

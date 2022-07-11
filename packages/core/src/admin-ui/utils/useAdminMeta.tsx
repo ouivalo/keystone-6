@@ -69,11 +69,21 @@ export function useAdminMeta(adminMetaHash: string, fieldViews: FieldViews) {
       lists: {},
     };
     adminMeta.lists.forEach(list => {
-      runtimeAdminMeta.lists[list.key] = {
-        ...list,
-        gqlNames: getGqlNames({ listKey: list.key, pluralGraphQLName: list.listQueryName }),
-        fields: {},
-      };
+      if (list.__typename === 'KeystoneAdminUIStandardListMeta') {
+        runtimeAdminMeta.lists[list.key] = {
+          ...list,
+          kind: 'list',
+          gqlNames: getGqlNames({ listKey: list.key, pluralGraphQLName: list.listQueryName }),
+          fields: {},
+        };
+      } else {
+        runtimeAdminMeta.lists[list.key] = {
+          ...list,
+          kind: 'singleton',
+          gqlNames: getGqlNames({ listKey: list.key, pluralGraphQLName: '' }),
+          fields: {},
+        };
+      }
       list.fields.forEach(field => {
         expectedExports.forEach(exportName => {
           if ((fieldViews[field.viewsIndex] as any)[exportName] === undefined) {

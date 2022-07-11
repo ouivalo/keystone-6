@@ -201,7 +201,6 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
           keystone {
             adminMeta {
               list(key: $listKey) {
-                hideCreate
                 fields {
                   path
                   itemView(id: 1) {
@@ -234,7 +233,6 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
 
   let itemViewFieldModesByField = useMemo(() => {
     let itemViewFieldModesByField: Record<string, 'edit' | 'read' | 'hidden'> = {};
-    console.log(dataGetter.data?.keystone?.adminMeta?.list?.fields);
     dataGetter.data?.keystone?.adminMeta?.list?.fields?.forEach(field => {
       if (field !== null && field.path !== null && field?.itemView?.fieldMode != null) {
         itemViewFieldModesByField[field.path] = field.itemView.fieldMode;
@@ -243,14 +241,10 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
     return itemViewFieldModesByField;
   }, [dataGetter.data?.keystone?.adminMeta?.list?.fields]);
 
-  console.log({ itemViewFieldModesByField });
-
   const metaQueryErrors = dataGetter.get('keystone').errors;
 
   // TODO page title on singletons
-  const pageTitle: string = loading
-    ? undefined
-    : data && data.item && (data.item[list.labelField] || data.item.id);
+  const pageTitle: string = loading ? undefined : data && data.item && data.item.id;
 
   return (
     <PageContainer
@@ -258,11 +252,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
       header={
         <ItemPageHeader
           list={list}
-          label={
-            loading
-              ? 'Loading...'
-              : data && data.item && (data.item[list.labelField] || data.item.id)
-          }
+          label={loading ? 'Loading...' : data && data.item && data.item.id}
         />
       }
     >

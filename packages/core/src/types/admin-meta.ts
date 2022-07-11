@@ -91,22 +91,6 @@ export type FieldMeta = {
   };
 };
 
-export type ListMeta = {
-  key: string;
-  path: string;
-  label: string;
-  singular: string;
-  plural: string;
-  description: string | null;
-  gqlNames: GqlNames;
-  initialColumns: string[];
-  pageSize: number;
-  labelField: string;
-  kind: 'list' | 'singleton';
-  initialSort: null | { direction: 'ASC' | 'DESC'; field: string };
-  fields: { [path: string]: FieldMeta };
-};
-
 export type AdminMeta = {
   enableSignout: boolean;
   enableSessionItem: boolean;
@@ -180,6 +164,31 @@ export type ListMetaRootValCommon = {
 };
 
 export type ListMetaRootVal = StandardListMetaRootVal | SingletonListMetaRootVal;
+
+type ListMetaCommon = {
+  key: string;
+  path: string;
+  label: string;
+  singular: string;
+  description: string | null;
+  fields: { [path: string]: FieldMeta };
+  gqlNames: GqlNames;
+};
+
+export type StandardListMeta = ListMetaCommon & {
+  plural: string;
+  initialColumns: string[];
+  pageSize: number;
+  labelField: string;
+  kind: 'list';
+  initialSort: null | { direction: 'ASC' | 'DESC'; field: string };
+};
+
+type SingletonListMeta = ListMetaCommon & {
+  kind: 'singleton';
+};
+
+export type ListMeta = StandardListMeta | SingletonListMeta;
 
 export type StandardListMetaRootVal = ListMetaRootValCommon & {
   plural: string;

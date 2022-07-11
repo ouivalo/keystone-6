@@ -3,7 +3,7 @@ import { ComponentProps, useState, useMemo, useRef, useEffect, useCallback } fro
 import isDeepEqual from 'fast-deep-equal';
 import { useMutation, gql, ApolloError } from '../apollo';
 import { useKeystone } from '..';
-import { ListMeta } from '../../types';
+import { StandardListMeta } from '../../types';
 import { usePreventNavigation } from './usePreventNavigation';
 import { Fields, Value } from '.';
 
@@ -17,7 +17,7 @@ type CreateItemHookResult = {
   create: () => Promise<{ id: string; label: string | null } | undefined>;
 };
 
-export function useCreateItem(list: ListMeta): CreateItemHookResult {
+export function useCreateItem(list: StandardListMeta): CreateItemHookResult {
   const toasts = useToasts();
   const { createViewFieldModes } = useKeystone();
 

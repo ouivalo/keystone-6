@@ -119,7 +119,9 @@ export const HomePage = () => {
         adminMeta {
           lists {
             key
-            hideCreate
+            ... on KeystoneAdminUIStandardListMeta {
+              hideCreate
+            }
           }
         }
       }

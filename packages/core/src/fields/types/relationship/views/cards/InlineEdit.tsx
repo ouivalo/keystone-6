@@ -5,7 +5,7 @@ import { Button } from '@keystone-ui/button';
 import { jsx, Stack } from '@keystone-ui/core';
 import { useToasts } from '@keystone-ui/toast';
 import { useCallback, useState } from 'react';
-import { ListMeta } from '../../../../../types';
+import { StandardListMeta } from '../../../../../types';
 import {
   deserializeValue,
   ItemData,
@@ -28,7 +28,7 @@ export function InlineEdit({
   onSave,
 }: {
   fields: readonly string[];
-  list: ListMeta;
+  list: StandardListMeta;
   selectedFields: string;
   itemGetter: DataGetter<ItemData>;
   onCancel: () => void;

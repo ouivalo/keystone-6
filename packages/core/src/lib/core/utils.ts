@@ -125,30 +125,40 @@ export async function promiseAllRejectWithAllErrors<T extends unknown[]>(
   return results.map((x: any) => x.value) as any;
 }
 
-export function getNamesFromList(
-  listKey: string,
-  { graphql, ui, kind }: KeystoneConfig['lists'][string]
-) {
+export function getNamesFromList(listKey: string, config: KeystoneConfig['lists'][string]) {
   const computedSingular = humanize(listKey);
   const computedPlural = pluralize.plural(computedSingular);
 
-  const path = ui?.path || labelToPath(kind === 'list' ? computedPlural : computedSingular);
+  const path =
+    config.ui?.path || labelToPath(config.kind === 'list' ? computedPlural : computedSingular);
 
-  if (ui?.path !== undefined && !/^[a-z-_][a-z0-9-_]*$/.test(ui.path)) {
+  if (config.ui?.path !== undefined && !/^[a-z-_][a-z0-9-_]*$/.test(config.ui.path)) {
     throw new Error(
-      `ui.path for ${listKey} is ${ui.path} but it must only contain lowercase letters, numbers, dashes, and underscores and not start with a number`
+      `ui.path for ${listKey} is ${config.ui.path} but it must only contain lowercase letters, numbers, dashes, and underscores and not start with a number`
     );
   }
 
+  if (config.kind === 'singleton') {
+    const adminUILabels = {
+      label: config.ui?.label || computedPlural,
+      singular: config.ui?.singular || computedSingular,
+      plural: computedPlural,
+      path,
+    };
+    const pluralGraphQLName = '';
+
+    return { pluralGraphQLName, adminUILabels };
+  }
+
   const adminUILabels = {
-    label: kind === 'list' ? ui?.label || computedPlural : computedSingular,
-    singular: ui?.singular || computedSingular,
-    plural: ui?.plural || computedPlural,
+    label: config.ui?.label || computedPlural,
+    singular: config.ui?.singular || computedSingular,
+    plural: config.ui?.plural || computedPlural,
     path,
   };
 
-  const pluralGraphQLName = graphql?.plural || labelToClass(computedPlural);
-  if (kind === 'list' && pluralGraphQLName === listKey) {
+  const pluralGraphQLName = config.graphql?.plural || labelToClass(computedPlural);
+  if (config.kind === 'list' && pluralGraphQLName === listKey) {
     throw new Error(
       `The list key and the plural name used in GraphQL must be different but the list key ${listKey} is the same as the plural GraphQL name, please specify graphql.plural`
     );

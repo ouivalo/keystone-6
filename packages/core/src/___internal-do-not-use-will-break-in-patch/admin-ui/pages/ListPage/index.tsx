@@ -59,8 +59,10 @@ let listMetaGraphqlQuery: TypedDocumentNode<
     keystone {
       adminMeta {
         list(key: $listKey) {
-          hideDelete
-          hideCreate
+          ... on KeystoneAdminUIStandardListMeta {
+            hideDelete
+            hideCreate
+          }
           fields {
             path
             isOrderable

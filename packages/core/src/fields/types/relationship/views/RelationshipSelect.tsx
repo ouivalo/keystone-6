@@ -7,7 +7,7 @@ import { RefObject, useEffect, useMemo, useState, createContext, useContext, use
 import { jsx } from '@keystone-ui/core';
 import { MultiSelect, Select, selectComponents } from '@keystone-ui/fields';
 import { validate as validateUUID } from 'uuid';
-import { IdFieldConfig, ListMeta } from '../../../../types';
+import { IdFieldConfig, ListMeta, StandardListMeta } from '../../../../types';
 import {
   ApolloClient,
   gql,
@@ -56,7 +56,7 @@ function useDebouncedValue<T>(value: T, limitMs: number): T {
   return debouncedValue;
 }
 
-function useFilter(search: string, list: ListMeta) {
+function useFilter(search: string, list: StandardListMeta) {
   return useMemo(() => {
     let conditions: Record<string, any>[] = [];
     if (search.length) {
@@ -127,6 +127,10 @@ export const RelationshipSelect = ({
       };
   extraSelection?: string;
 }) => {
+  if (list.kind === 'singleton') {
+    throw new Error('singleton bad');
+  }
+
   const [search, setSearch] = useState('');
   // note it's important that this is in state rather than a ref
   // because we want a re-render if the element changes
@@ -209,7 +213,7 @@ export const RelationshipSelect = ({
   const [lastFetchMore, setLastFetchMore] = useState<{
     where: Record<string, any>;
     extraSelection: string;
-    list: ListMeta;
+    list: StandardListMeta;
     skip: number;
   } | null>(null);
 

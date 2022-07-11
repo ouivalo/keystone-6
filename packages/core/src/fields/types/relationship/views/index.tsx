@@ -14,6 +14,7 @@ import {
   FieldControllerConfig,
   FieldProps,
   ListMeta,
+  StandardListMeta,
 } from '../../../../types';
 import { Link } from '../../../../admin-ui/router';
 import { useKeystone, useList } from '../../../../admin-ui/context';
@@ -31,7 +32,7 @@ function LinkToRelatedItems({
 }: {
   itemId: string | null;
   value: FieldProps<typeof controller>['value'] & { kind: 'many' | 'one' };
-  list: ListMeta;
+  list: StandardListMeta;
   refFieldKey?: string;
 }) {
   function constructQuery({
@@ -82,6 +83,11 @@ export const Field = ({
 }: FieldProps<typeof controller>) => {
   const keystone = useKeystone();
   const foreignList = useList(field.refListKey);
+
+  if (foreignList.kind === 'singleton') {
+    throw new Error('Singleton bad');
+  }
+
   const localList = useList(field.listKey);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -247,6 +253,9 @@ export const Cell: CellComponent<typeof controller> = ({ field, item }) => {
   const { colors } = useTheme();
 
   if (field.display === 'count') {
+    if (list.kind === 'singleton') {
+      throw new Error('singleton bad');
+    }
     const count = item[`${field.path}Count`] ?? 0;
     return (
       <CellContainer>
@@ -480,6 +489,10 @@ export const controller = (
     filter: {
       Filter: ({ onChange, value }) => {
         const foreignList = useList(config.fieldMeta.refListKey);
+        if (foreignList.kind === 'singleton') {
+          throw new Error('Singleton bad');
+        }
+
         const { filterValues, loading } = useRelationshipFilterValues({
           value,
           list: foreignList,
@@ -626,7 +639,9 @@ export const controller = (
 function useRelationshipFilterValues({ value, list }: { value: string; list: ListMeta }) {
   const foreignIds = getForeignIds(value);
   const where = { id: { in: foreignIds } };
-
+  if (list.kind === 'singleton') {
+    throw new Error('Singleton bad');
+  }
   const query = gql`
     query FOREIGNLIST_QUERY($where: ${list.gqlNames.whereInputName}!) {
       items: ${list.gqlNames.listQueryName}(where: $where) {

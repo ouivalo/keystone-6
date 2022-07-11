@@ -18,7 +18,7 @@ import { Button } from '@keystone-ui/button';
 import { Tooltip } from '@keystone-ui/tooltip';
 import { LoadingDots } from '@keystone-ui/loading';
 import { useEffect, useRef, useState } from 'react';
-import { FieldProps, ListMeta } from '../../../../../types';
+import { FieldProps, ListMeta, StandardListMeta } from '../../../../../types';
 import {
   getRootGraphQLFieldsFromFieldController,
   makeDataGetter,
@@ -73,7 +73,7 @@ export function Cards({
   onChange,
   forceValidation,
 }: {
-  foreignList: ListMeta;
+  foreignList: StandardListMeta;
   localList: ListMeta;
   id: string | null;
   value: { kind: 'cards-view' };

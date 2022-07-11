@@ -6,7 +6,7 @@ import { jsx, Stack } from '@keystone-ui/core';
 import isDeepEqual from 'fast-deep-equal';
 import { useToasts } from '@keystone-ui/toast';
 import { Button } from '@keystone-ui/button';
-import { ListMeta } from '../../../../../types';
+import { StandardListMeta } from '../../../../../types';
 import {
   ItemData,
   makeDataGetter,
@@ -27,7 +27,7 @@ export function InlineCreate({
   fields: fieldPaths,
   selectedFields,
 }: {
-  list: ListMeta;
+  list: StandardListMeta;
   selectedFields: string;
   fields: readonly string[];
   onCancel: () => void;
