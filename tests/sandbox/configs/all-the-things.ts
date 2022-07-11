@@ -1,4 +1,4 @@
-import { list, graphql, config } from '@keystone-6/core';
+import { list, singleton, graphql, config } from '@keystone-6/core';
 import {
   checkbox,
   password,
@@ -128,6 +128,13 @@ export const lists = {
         },
       }),
       ...trackingFields,
+    },
+  }),
+  Publisher: singleton({
+    fields: {
+      title: text({ defaultValue: 'Pelican Riot Home' }),
+      copyrightText: text({ defaultValue: '© 2022 Pelican Riot Home' }),
+      contactEmail: text({ defaultValue: 'help@p-rh.com' }),
     },
   }),
 };

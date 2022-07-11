@@ -4,7 +4,7 @@ import {
   ListsConfig,
   SingletonConfig,
   BaseSingletonTypeInfo,
-  ListConfig,
+  StandardListConfig,
   BaseStandardListTypeInfo,
 } from '@keystone-6/core/types';
 import { setupTestRunner } from '@keystone-6/core/testing';
@@ -23,7 +23,7 @@ type Blah<Lists extends ListsConfig> = {
 
 type GeneralSingletonConfig = SingletonConfig<any, any>;
 
-type GeneralStandardListConfig = ListConfig<any, any>;
+type GeneralStandardListConfig = StandardListConfig<any, any>;
 
 type Blah2<List extends GeneralSingletonConfig | GeneralStandardListConfig> =
   List extends GeneralSingletonConfig

@@ -23,6 +23,15 @@ export type IdFieldConfig =
       type?: 'Int' | 'BigInt';
     };
 
+export type ListConfig<
+  ListTypeInfo extends BaseSingletonTypeInfo | BaseStandardListTypeInfo,
+  Fields extends BaseFields<ListTypeInfo>
+> = ListTypeInfo extends BaseSingletonTypeInfo
+  ? SingletonConfig<ListTypeInfo, Fields>
+  : ListTypeInfo extends BaseStandardListTypeInfo
+  ? StandardListConfig<ListTypeInfo, Fields>
+  : never;
+
 export type SingletonConfig<
   ListTypeInfo extends BaseSingletonTypeInfo,
   Fields extends BaseFields<ListTypeInfo>

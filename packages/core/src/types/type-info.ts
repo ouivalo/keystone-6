@@ -9,8 +9,8 @@ export type BaseSingletonTypeInfo = {
   fields: string;
   item: BaseItem;
   inputs: {
-    create: GraphQLInput;
     update: GraphQLInput;
+    create: never;
   };
   all: BaseKeystoneTypeInfo;
 };

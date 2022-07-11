@@ -68,3 +68,10 @@ model User {
   from_Thing_toOneRelationship     Thing[]  @relation("Thing_toOneRelationship")
   from_Thing_toOneRelationshipCard Thing[]  @relation("Thing_toOneRelationshipCard")
 }
+
+model Publisher {
+  id            Int    @id @default(autoincrement())
+  title         String @default("Pelican Riot Home")
+  copyrightText String @default("© 2022 Pelican Riot Home")
+  contactEmail  String @default("help@p-rh.com")
+}

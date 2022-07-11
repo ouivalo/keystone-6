@@ -18,6 +18,7 @@ import type { MaybePromise } from '../utils';
 import type {
   ListOrSingletonSchemaConfig,
   StandardListConfig,
+  ListConfig,
   MaybeSessionFunction,
   MaybeItemFunction,
   IdFieldConfig,
@@ -122,7 +123,8 @@ export type KeystoneConfig<TypeInfo extends BaseKeystoneTypeInfo = BaseKeystoneT
 
 export type {
   ListOrSingletonSchemaConfig as ListSchemaConfig,
-  StandardListConfig as ListConfig,
+  ListConfig,
+  StandardListConfig,
   BaseFields,
   MaybeSessionFunction,
   MaybeItemFunction,

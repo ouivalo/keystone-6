@@ -1,5 +1,7 @@
 import type { KeystoneContextFromListTypeInfo } from '..';
 import { BaseListTypeInfo } from '../type-info';
+import { MaybePromise } from '../utils';
+import { GetCreateInput } from './access-control';
 
 type CommonArgs<ListTypeInfo extends BaseListTypeInfo> = {
   context: KeystoneContextFromListTypeInfo<ListTypeInfo>;
@@ -97,26 +99,11 @@ type ArgsForCreateOrUpdateOperation<ListTypeInfo extends BaseListTypeInfo> =
 
 type ResolveInputListHook<ListTypeInfo extends BaseListTypeInfo> = (
   args: ArgsForCreateOrUpdateOperation<ListTypeInfo> & CommonArgs<ListTypeInfo>
-) =>
-  | Promise<ListTypeInfo['inputs']['create'] | ListTypeInfo['inputs']['update']>
-  | ListTypeInfo['inputs']['create']
-  | ListTypeInfo['inputs']['update']
-  // TODO: These were here to support field hooks before we created a separate type
-  // (see ResolveInputFieldHook), check whether they're safe to remove now
-  | Record<string, any>
-  | string
-  | number
-  | boolean
-  | null;
+) => MaybePromise<GetCreateInput<ListTypeInfo> | ListTypeInfo['inputs']['update']>;
 
 type ResolveInputFieldHook<ListTypeInfo extends BaseListTypeInfo> = (
   args: ArgsForCreateOrUpdateOperation<ListTypeInfo> & CommonArgs<ListTypeInfo>
 ) =>
-  | Promise<ListTypeInfo['inputs']['create'] | ListTypeInfo['inputs']['update']>
-  | ListTypeInfo['inputs']['create']
-  | ListTypeInfo['inputs']['update']
-  // TODO: These may or may not be correct, but without them you can't define a
-  // resolveInput hook for a field that returns a simple value (e.g timestamp)
   | Record<string, any>
   | string
   | number

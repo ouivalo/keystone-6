@@ -9,10 +9,13 @@ import type {
   KeystoneConfig,
   KeystoneContext,
   BaseKeystoneTypeInfo,
-  ListConfig,
   BaseSingletonTypeInfo,
 } from '../types';
-import { SingletonConfig, StandardListConfigWithoutKind } from '../types/config/lists';
+import {
+  SingletonConfig,
+  StandardListConfig,
+  StandardListConfigWithoutKind,
+} from '../types/config/lists';
 
 export function config<TypeInfo extends BaseKeystoneTypeInfo>(config: KeystoneConfig<TypeInfo>) {
   return config;
@@ -21,7 +24,9 @@ export function config<TypeInfo extends BaseKeystoneTypeInfo>(config: KeystoneCo
 export function list<
   Fields extends BaseFields<ListTypeInfo>,
   ListTypeInfo extends BaseStandardListTypeInfo
->(config: StandardListConfigWithoutKind<ListTypeInfo, Fields>): ListConfig<ListTypeInfo, any> {
+>(
+  config: StandardListConfigWithoutKind<ListTypeInfo, Fields>
+): StandardListConfig<ListTypeInfo, any> {
   return { ...config, kind: 'list' };
 }
 

@@ -28,8 +28,11 @@ type CreateItemAccessArgs<ListTypeInfo extends BaseListTypeInfo> = BaseAccessArg
   /**
    * The input passed in from the GraphQL API
    */
-  inputData: ListTypeInfo['inputs']['create'];
+  inputData: GetCreateInput<ListTypeInfo>;
 };
+
+export type GetCreateInput<ListTypeInfo extends BaseListTypeInfo> =
+  ListTypeInfo extends BaseStandardListTypeInfo ? ListTypeInfo['inputs']['create'] : never;
 
 export type CreateListItemAccessControl<ListTypeInfo extends BaseStandardListTypeInfo> = (
   args: CreateItemAccessArgs<ListTypeInfo>

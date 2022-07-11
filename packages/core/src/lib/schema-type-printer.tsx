@@ -110,6 +110,7 @@ export function printGeneratedTypes(
     };`
         : `{
       update: ${gqlNames.updateInputName};
+      create: never;
     };`;
 
     allListsStr += `\n  readonly ${listKey}: ${listTypeInfoName};`;
