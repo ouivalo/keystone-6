@@ -17,7 +17,7 @@ import {
   StandardListMeta,
 } from '../../../../types';
 import { Link } from '../../../../admin-ui/router';
-import { useKeystone, useList } from '../../../../admin-ui/context';
+import { useKeystone, useList, useStandardList } from '../../../../admin-ui/context';
 import { gql, useQuery } from '../../../../admin-ui/apollo';
 import { CellContainer, CreateItemDrawer } from '../../../../admin-ui/components';
 
@@ -82,11 +82,7 @@ export const Field = ({
   forceValidation,
 }: FieldProps<typeof controller>) => {
   const keystone = useKeystone();
-  const foreignList = useList(field.refListKey);
-
-  if (foreignList.kind === 'singleton') {
-    throw new Error('Singleton bad');
-  }
+  const foreignList = useStandardList(field.refListKey);
 
   const localList = useList(field.listKey);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -249,13 +245,10 @@ export const Field = ({
 };
 
 export const Cell: CellComponent<typeof controller> = ({ field, item }) => {
-  const list = useList(field.refListKey);
+  const list = useStandardList(field.refListKey);
   const { colors } = useTheme();
 
   if (field.display === 'count') {
-    if (list.kind === 'singleton') {
-      throw new Error('singleton bad');
-    }
     const count = item[`${field.path}Count`] ?? 0;
     return (
       <CellContainer>
@@ -488,11 +481,7 @@ export const controller = (
     },
     filter: {
       Filter: ({ onChange, value }) => {
-        const foreignList = useList(config.fieldMeta.refListKey);
-        if (foreignList.kind === 'singleton') {
-          throw new Error('Singleton bad');
-        }
-
+        const foreignList = useStandardList(config.fieldMeta.refListKey);
         const { filterValues, loading } = useRelationshipFilterValues({
           value,
           list: foreignList,

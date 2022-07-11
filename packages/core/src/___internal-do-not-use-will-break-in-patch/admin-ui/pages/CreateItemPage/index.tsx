@@ -7,13 +7,14 @@ import { Button } from '@keystone-ui/button';
 import { useRouter } from 'next/router';
 import { Fields } from '../../../../admin-ui/utils';
 import { PageContainer } from '../../../../admin-ui/components/PageContainer';
-import { useKeystone, useList } from '../../../../admin-ui';
+import { useKeystone } from '../../../../admin-ui';
 import { GraphQLErrorNotice } from '../../../../admin-ui/components';
-import { ListMeta } from '../../../../types';
+import { StandardListMeta } from '../../../../types';
 import { useCreateItem } from '../../../../admin-ui/utils/useCreateItem';
 import { BaseToolbar, ColumnLayout, ItemPageHeader } from '../ItemPage/common';
+import { useStandardList } from '../../../../admin-ui/context';
 
-function CreatePageForm(props: { list: ListMeta }) {
+function CreatePageForm(props: { list: StandardListMeta }) {
   const createItem = useCreateItem(props.list);
   const router = useRouter();
   return (
@@ -56,7 +57,7 @@ export const getCreateItemPage = (props: CreateItemPageProps) => () =>
   <CreateItemPage {...props} />;
 
 function CreateItemPage(props: CreateItemPageProps) {
-  const list = useList(props.listKey);
+  const list = useStandardList(props.listKey);
   const { createViewFieldModes } = useKeystone();
 
   return (

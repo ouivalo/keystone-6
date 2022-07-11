@@ -17,7 +17,7 @@ import {
 } from '../../types';
 import { coerceAndValidateForGraphQLInput } from '../coerceAndValidateForGraphQLInput';
 import { accessReturnError, extensionError } from './graphql-errors';
-import { InitialisedList, InitialisedStandardList } from './types-for-lists';
+import { InitialisedList } from './types-for-lists';
 import { InputFilter } from './where-inputs';
 
 export async function getOperationAccess(
@@ -52,7 +52,7 @@ export async function getOperationAccess(
 }
 
 export async function getAccessFilters(
-  list: InitialisedStandardList,
+  list: InitialisedList,
   context: KeystoneContext,
   operation: 'update' | 'query' | 'delete'
 ): Promise<boolean | InputFilter> {

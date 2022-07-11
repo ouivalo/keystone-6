@@ -51,7 +51,7 @@ const ListCard = ({ listKey, count, hideCreate, kind }: ListCardProps) => {
         }}
       >
         <h3 css={{ margin: `0 0 ${spacing.small}px 0` }}>{list.label} </h3>
-        {kind === 'list' ? (
+        {list.kind === 'list' ? (
           count.type === 'success' ? (
             <span css={{ color: colors.foreground, textDecoration: 'none' }}>
               {count.count} item{count.count !== 1 ? 's' : ''}

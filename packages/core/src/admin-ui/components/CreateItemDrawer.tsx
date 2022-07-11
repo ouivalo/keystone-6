@@ -5,7 +5,7 @@ import { jsx, Box } from '@keystone-ui/core';
 import { Drawer } from '@keystone-ui/modals';
 import { LoadingDots } from '@keystone-ui/loading';
 
-import { useKeystone, useList } from '../context';
+import { useKeystone, useStandardList } from '../context';
 
 import { Fields } from '../utils/Fields';
 import { useCreateItem } from '../utils/useCreateItem';
@@ -21,7 +21,7 @@ export function CreateItemDrawer({
   onCreate: (item: { id: string; label: string }) => void;
 }) {
   const { createViewFieldModes } = useKeystone();
-  const list = useList(listKey);
+  const list = useStandardList(listKey);
   const createItemState = useCreateItem(list);
 
   return (

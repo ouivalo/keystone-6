@@ -449,7 +449,14 @@ const fetchItemForItemViewFieldMode = extendContext(context => {
       return items.get(id)!;
     }
 
-    let promise = context.db[listKey].findOne({ where: { id } });
+    const db = context.db[listKey];
+    let promise;
+
+    if (db.kind === 'list') {
+      promise = db.findOne({ where: { id } });
+    } else {
+      promise = db.read();
+    }
 
     items.set(id, promise);
     return promise;

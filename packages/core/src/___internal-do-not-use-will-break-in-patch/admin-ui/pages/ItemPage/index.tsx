@@ -37,7 +37,7 @@ import {
 } from '../../../../admin-ui/utils';
 
 import { gql, useMutation, useQuery } from '../../../../admin-ui/apollo';
-import { useList } from '../../../../admin-ui/context';
+import { useStandardList } from '../../../../admin-ui/context';
 import { PageContainer, HEADER_HEIGHT } from '../../../../admin-ui/components/PageContainer';
 import { GraphQLErrorNotice } from '../../../../admin-ui/components/GraphQLErrorNotice';
 import { usePreventNavigation } from '../../../../admin-ui/utils/usePreventNavigation';
@@ -71,7 +71,7 @@ function ItemForm({
   fieldModes: Record<string, 'edit' | 'read' | 'hidden'>;
   showDelete: boolean;
 }) {
-  const list = useList(listKey);
+  const list = useStandardList(listKey);
 
   const [update, { loading, error, data }] = useMutation(
     list.kind === 'list'
@@ -277,7 +277,7 @@ function DeleteButton({
 export const getItemPage = (props: ItemPageProps) => () => <ItemPage {...props} />;
 
 const ItemPage = ({ listKey }: ItemPageProps) => {
-  const list = useList(listKey);
+  const list = useStandardList(listKey);
   const id = useRouter().query.id as string;
 
   const { spacing, typography } = useTheme();
@@ -396,7 +396,7 @@ const ItemPage = ({ listKey }: ItemPageProps) => {
               <ItemForm
                 fieldModes={itemViewFieldModesByField}
                 selectedFields={selectedFields}
-                showDelete={list.kind !== 'singleton' && !data.keystone.adminMeta.list!.hideDelete}
+                showDelete={!data.keystone.adminMeta.list!.hideDelete}
                 listKey={listKey}
                 itemGetter={dataGetter.get('item') as DataGetter<ItemData>}
               />

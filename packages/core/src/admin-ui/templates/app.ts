@@ -110,7 +110,15 @@ function getLazyMetadataQuery(
 
   const queryType = graphqlSchema.getQueryType();
   if (queryType) {
-    const getListByKey = (name: string) => adminMeta.lists.find(({ key }: any) => key === name);
+    const getListByKey = (name: string) => {
+      let l = adminMeta.lists.find(({ key }) => key === name);
+      if (!l || l.__typename === 'KeystoneAdminUISingletonListMeta') {
+        throw new Error('singleton bad');
+      }
+
+      return l;
+    };
+
     const fields = queryType.getFields();
     if (fields['authenticatedItem'] !== undefined) {
       const authenticatedItemType = fields['authenticatedItem'].type;
@@ -167,7 +175,7 @@ function getLazyMetadataQuery(
               kind: 'SelectionSet',
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: getListByKey(name)!.labelField } },
+                { kind: 'Field', name: { kind: 'Name', value: getListByKey(name).labelField } },
               ],
             },
           })),

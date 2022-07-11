@@ -11,7 +11,7 @@ import { LoadingDots } from '@keystone-ui/loading';
 import { AlertDialog } from '@keystone-ui/modals';
 import { useToasts } from '@keystone-ui/toast';
 
-import { ListMeta } from '../../../../types';
+import { StandardListMeta } from '../../../../types';
 import {
   getRootGraphQLFieldsFromFieldController,
   DataGetter,
@@ -22,7 +22,7 @@ import { gql, TypedDocumentNode, useMutation, useQuery } from '../../../../admin
 import { CellLink } from '../../../../admin-ui/components';
 import { PageContainer, HEADER_HEIGHT } from '../../../../admin-ui/components/PageContainer';
 import { Pagination, PaginationLabel } from '../../../../admin-ui/components/Pagination';
-import { useList } from '../../../../admin-ui/context';
+import { useList, useStandardList } from '../../../../admin-ui/context';
 import { Link, useRouter } from '../../../../admin-ui/router';
 import { FieldSelection } from './FieldSelection';
 import { FilterAdd } from './FilterAdd';
@@ -130,9 +130,7 @@ function useQueryParamsFromLocalStorage(listKey: string) {
 export const getListPage = (props: ListPageProps) => () => <ListPage {...props} />;
 
 const ListPage = ({ listKey }: ListPageProps) => {
-  const list = useList(listKey);
-  console.log(list);
-
+  const list = useStandardList(listKey);
   const { query } = useRouter();
 
   const { resetToDefaults } = useQueryParamsFromLocalStorage(listKey);
@@ -424,7 +422,7 @@ function DeleteManyButton({
   refetch,
 }: {
   selectedItems: ReadonlySet<string>;
-  list: ListMeta;
+  list: StandardListMeta;
   refetch: () => void;
 }) {
   const [deleteItems, deleteItemsState] = useMutation(

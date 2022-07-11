@@ -158,3 +158,11 @@ export const useList = (key: string) => {
     throw new Error(`Invalid list key provided to useList: ${key}`);
   }
 };
+
+export const useStandardList = (key: string) => {
+  const list = useList(key);
+  if (list.kind === 'singleton') {
+    throw new Error('singleton bad');
+  }
+  return list;
+};

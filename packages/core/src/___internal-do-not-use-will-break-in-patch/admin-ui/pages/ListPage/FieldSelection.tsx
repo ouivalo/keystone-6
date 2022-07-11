@@ -6,7 +6,7 @@ import { ChevronDownIcon } from '@keystone-ui/icons/icons/ChevronDownIcon';
 import { Options, OptionPrimitive, CheckMark } from '@keystone-ui/options';
 import { Popover } from '@keystone-ui/popover';
 import { useRouter } from 'next/router';
-import { ListMeta } from '../../../../types';
+import { StandardListMeta } from '../../../../types';
 import { useSelectedFields } from './useSelectedFields';
 
 function isArrayEqual(arrA: string[], arrB: string[]) {
@@ -38,7 +38,7 @@ export function FieldSelection({
   list,
   fieldModesByFieldPath,
 }: {
-  list: ListMeta;
+  list: StandardListMeta;
   fieldModesByFieldPath: Record<string, 'hidden' | 'read'>;
 }) {
   const router = useRouter();
