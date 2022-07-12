@@ -115,7 +115,12 @@ export function printGeneratedTypes(
 
     allListsStr += `\n  readonly ${listKey}: ${listTypeInfoName};`;
     listsNamespaceStr += `
-  export type ${listKey} = import('@keystone-6/core').ListConfig<${listTypeInfoName}, any>;
+  export type ${listKey} = import('@keystone-6/core/types').${
+      {
+        list: 'StandardList',
+        singleton: 'Singleton',
+      }[list.kind]
+    }Config<${listTypeInfoName}, any>;
   namespace ${listKey} {
     export type Item = import('.prisma/client').${listKey};
     export type TypeInfo = {
@@ -147,8 +152,12 @@ ${
 type __TypeInfo = TypeInfo;
 
 export type Lists = {
-  [Key in keyof TypeInfo['lists']]?: import('@keystone-6/core').ListConfig<TypeInfo['lists'][Key], any>
-} & Record<string, import('@keystone-6/core').ListConfig<any, any>>;
+  ${Object.keys(lists)
+    .map(listKey => {
+      return `${listKey}?: Lists.${listKey};`;
+    })
+    .join('\n')}
+} & Record<string, import('@keystone-6/core/types').SingletonConfig<any, any> | import('@keystone-6/core/types').StandardListConfig<any, any>>;
 `;
   return printedTypes + listsNamespaceStr + postlude;
 }

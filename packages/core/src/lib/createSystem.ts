@@ -124,7 +124,7 @@ async function ensureSingletons(lists: Record<string, InitialisedList>, prismaCl
     ([, { kind }]) => kind === 'singleton'
   )) {
     const model = prismaClient[listKey[0].toLowerCase() + listKey.slice(1)];
-    let item = await model.findFirst({ where: { id: 1 } });
+    const item = await model.findUnique({ where: { id: 1 } });
 
     if (!item) {
       await model.create({ data: { id: 1 } });

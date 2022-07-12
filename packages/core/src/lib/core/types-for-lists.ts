@@ -12,8 +12,9 @@ import {
   CacheHintArgs,
   MaybePromise,
   SingletonConfig,
+  StandardListConfig,
 } from '../../types';
-import { graphql, ListConfig } from '../..';
+import { graphql } from '../..';
 import { FieldHooks } from '../../types/config/hooks';
 import { FilterOrderArgs } from '../../types/config/fields';
 import {
@@ -73,7 +74,7 @@ export type InitialisedSingleton = {
 
 export type InitialisedStandardList = {
   kind: 'list';
-  config: ListConfig<any, any>;
+  config: StandardListConfig<any, any>;
 } & CommonInitialisedList;
 
 export type InitialisedList = InitialisedStandardList | InitialisedSingleton;

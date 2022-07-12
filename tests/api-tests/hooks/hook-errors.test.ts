@@ -1,10 +1,14 @@
 import { relationship, text } from '@keystone-6/core/fields';
 import { list } from '@keystone-6/core';
 import { GraphQLRequest, setupTestRunner } from '@keystone-6/core/testing';
-import { KeystoneContext, ListConfig, BaseStandardListTypeInfo } from '@keystone-6/core/types';
+import {
+  KeystoneContext,
+  StandardListConfig,
+  BaseStandardListTypeInfo,
+} from '@keystone-6/core/types';
 import { apiTestConfig, expectExtensionError, unpackErrors } from '../utils';
 
-const User: ListConfig<
+const User: StandardListConfig<
   BaseStandardListTypeInfo & { item: { id: string; name: string }; all: any },
   any
 > = list({
@@ -35,7 +39,7 @@ const User: ListConfig<
   },
 });
 
-const Post: ListConfig<
+const Post: StandardListConfig<
   BaseStandardListTypeInfo & { item: { id: string; title: string; content: string }; all: any },
   any
 > = list({

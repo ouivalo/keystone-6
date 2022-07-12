@@ -23,15 +23,6 @@ export type IdFieldConfig =
       type?: 'Int' | 'BigInt';
     };
 
-export type ListConfig<
-  ListTypeInfo extends BaseSingletonTypeInfo | BaseStandardListTypeInfo,
-  Fields extends BaseFields<ListTypeInfo>
-> = ListTypeInfo extends BaseSingletonTypeInfo
-  ? SingletonConfig<ListTypeInfo, Fields>
-  : ListTypeInfo extends BaseStandardListTypeInfo
-  ? StandardListConfig<ListTypeInfo, Fields>
-  : never;
-
 export type SingletonConfig<
   ListTypeInfo extends BaseSingletonTypeInfo,
   Fields extends BaseFields<ListTypeInfo>
@@ -55,7 +46,7 @@ export type StandardListConfig<
 
 export type StandardListConfigWithoutKind<
   ListTypeInfo extends BaseStandardListTypeInfo,
-  Fields extends BaseFields<BaseStandardListTypeInfo>
+  Fields extends BaseFields<ListTypeInfo>
 > = {
   /*
       A note on defaults: several options default based on the listKey, including label, path,

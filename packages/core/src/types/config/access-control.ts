@@ -32,7 +32,7 @@ type CreateItemAccessArgs<ListTypeInfo extends BaseListTypeInfo> = BaseAccessArg
 };
 
 export type GetCreateInput<ListTypeInfo extends BaseListTypeInfo> =
-  ListTypeInfo extends BaseStandardListTypeInfo ? ListTypeInfo['inputs']['create'] : never;
+  ListTypeInfo extends BaseStandardListTypeInfo ? ListTypeInfo['inputs']['create'] : any;
 
 export type CreateListItemAccessControl<ListTypeInfo extends BaseStandardListTypeInfo> = (
   args: CreateItemAccessArgs<ListTypeInfo>
