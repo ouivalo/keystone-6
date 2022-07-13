@@ -4,11 +4,66 @@ import { RelatedContent } from '../../../components/RelatedContent';
 
 # Singletons
 
-In Keystone, a Singleton is a list type that contains only one entry.
+In Keystone, a Singleton is a special kind of list that can contain only one entry. This kind of list is useful for things like a settings page, header or footer information,
+or any data that only needs one instance.
 
 ## Configuration
 
-A little about the configuration differences
+As described in the [Schema API docs](../api/schema) Keystone has two kinds of lists, a standard list (`kind: 'list'`) and a singleton (`kind: 'singleton'`).
+The recommended way to configure these is by using the `list()` and `singleton()` helper functions.
+
+Singletons are configured in the same way as a standard list but with a few differences in configuration options.
+
+```typescript
+import { config, singleton } from '@keystone-6/core';
+
+export default config({
+  lists: {
+    SingletonName: singleton({
+      fields: { /* ... */ },
+      access: { /* ... */ },
+      ui: { /* ... */ },
+      hooks: { /* ... */ },
+      graphql: { /* ... */ },
+      db: { /* ... */ },
+      description: '...',
+    }),
+    /* ... */
+  }),
+  /* ... */
+};
+```
+
+### Fields
+
+The `fields` object remains the same across both the standard and singleton lists. See [Fields API Docs](../api/fields) for more info on field configuration.
+
+### Access Control
+
+As a singleton can only have one entry the `access` object does not accept a `filter`, so therefore only accepts `operation` and `item` level access control.
+
+```typescript
+import { config, singleton } from '@keystone-6/core';
+
+export default config({
+  lists: {
+    SingletonName: singleton({
+      access: {
+        operation: {
+          query: ({ session, context, listKey, operation }) => true,,
+            update: ({ session, context, listKey, operation }) => true
+          },
+          item: {
+            read: ({ session, context, listKey, operation, inputData, item }) => true,
+            update: ({ session, context, listKey, operation, inputData, item }) => true,
+          }
+      }
+    })
+  }
+})
+```
+
+?> Note: While the `operation` variable is provided the only value that will ever be provided for a singleton list is `'update'`
 
 ### Hooks
 
@@ -16,13 +71,6 @@ Differences in Hooks to Standard List
 
 - no `validateDelete`
 - no `create` operation??
-
-### Access Control
-
-Differences in `access` API to Standard List
-
-- No Filter - just operation and item
-- No create and delete on `operation` or `item`
 
 ### UI config
 
@@ -71,7 +119,7 @@ Differences in `access` API to Standard List
     heading="Schema API"
     href="../apis/schema"
     >
-    Documentation for the Schema API 
+    Documentation for the Schema API
   </Well>
 </RelatedContent>
 

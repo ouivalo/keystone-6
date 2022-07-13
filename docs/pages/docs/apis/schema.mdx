@@ -5,10 +5,11 @@ import { RelatedContent } from '../../../components/RelatedContent';
 # Schema API
 
 The `lists` property of the [system configuration](./config) object is where you define the data model, or schema, of your Keystone system.
-It accepts an object with list names as keys, and `list()` or `singleton()` configurations as values.
+It accepts an object with list names as keys, and `ListConfig` as values. Keystone provides helper functions - `list()` and `singleton()` -
+that perform validation and type checking, which can be provided as values.
 
 ```typescript
-import { config, list } from '@keystone-6/core';
+import { config, list, singleton } from '@keystone-6/core';
 
 export default config({
   lists: {
@@ -38,16 +39,16 @@ export default config({
 };
 ```
 
-This document will explain the configuration options which can be used with the `list()` and `singleton()` functions.
+This document will explain the configuration options that are available in `ListConfig` and can be provided to the `list()` and `singleton()` functions.
 
 ## List Types - Standard Lists and Singletons
 
-Keystone has two types of lists, the first is a standard list that uses the `list()` function and the second
-type is a [singleton](<https://en.wikipedia.org/wiki/Singleton_(mathematics)>) list that uses the `singleton()` function, a list that uses the `singleton()` function will only support one entry.
-The standard list will be the best choice in most situations.
+Keystone has two kinds of lists, the first is a standard list that uses the `list()` function - or `kind: 'list'` if you are not using the helper function - and the second
+type is a [singleton](<https://en.wikipedia.org/wiki/Singleton_(mathematics)>) list that uses the `singleton()` function - or `kind: 'singleton'`, a singleton list will only support one entry.
 
 Both list types are configured in the same way and have most of the same options, with singletons not having options and functions relating to multiple entries
-(ie filtering, `findMany`, `create`) for more details on singletons see [our Singleton guide](../guides/singletons).
+(ie filtering, `findMany`, `create`). As singletons have a specific use case, and most lists will be a standard list, all our documentation is based on using a standard list.
+For more details on singletons and how they differ from a standard list see [our Singleton guide](../guides/singletons).
 
 ## List Options:
 
